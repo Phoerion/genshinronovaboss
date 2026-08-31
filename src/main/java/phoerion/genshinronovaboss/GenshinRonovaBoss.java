@@ -2,12 +2,16 @@ package phoerion.genshinronovaboss;
 
 import net.fabricmc.api.ModInitializer;
 
-import net.minecraft.util.Identifier;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import phoerion.genshinronovaboss.entity.ModEntities;
+import phoerion.genshinronovaboss.entity.custom.RonovaEntity;
 import phoerion.genshinronovaboss.item.ModItemGroups;
 import phoerion.genshinronovaboss.item.ModItems;
+import phoerion.genshinronovaboss.network.ModNetworking;
+import phoerion.genshinronovaboss.particle.ModParticles;
 
 public class GenshinRonovaBoss implements ModInitializer {
 	public static final String MOD_ID = "genshinronovaboss";
@@ -25,9 +29,13 @@ public class GenshinRonovaBoss implements ModInitializer {
 
 		ModItems.registerItems();
 		ModItemGroups.registerItemGroups();
-	}
+		ModNetworking.registerC2SPackets();
 
-	public static Identifier id(String path) {
-		return new Identifier(MOD_ID, path);
+		ModEntities.registerEntities();
+
+		ModParticles.registerParticles();
+
+
+		FabricDefaultAttributeRegistry.register(ModEntities.RONOVA_BOSS, RonovaEntity.createMobAttributes());
 	}
 }

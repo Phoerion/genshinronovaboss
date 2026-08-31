@@ -1,0 +1,151 @@
+package phoerion.genshinronovaboss.entity.custom;
+
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.projectile.PersistentProjectileEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
+import phoerion.genshinronovaboss.entity.ModEntities;
+import phoerion.genshinronovaboss.item.ModItems;
+import phoerion.genshinronovaboss.particle.ModParticles;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.*;
+import software.bernie.geckolib.util.GeckoLibUtil;
+
+public class RonovaProjectileEntity extends PersistentProjectileEntity implements GeoEntity {
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+
+    public RonovaProjectileEntity(World world, LivingEntity owner) {
+        super(ModEntities.PROJECTILE, owner, world);
+    }
+
+    public RonovaProjectileEntity(EntityType<? extends PersistentProjectileEntity> entityType, World world) {
+        super(entityType, world);
+    }
+
+    @Override
+    protected ItemStack asItemStack() {
+        return ModItems.STELLAR_VISION.getDefaultStack();
+    }
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        //controllers.add(new AnimationController<>(this, "controller", state ->
+        //        state.setAndContinue(RawAnimation.begin().thenLoop("fly"))
+        //));
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return this.cache;
+    }
+
+    @Override
+    protected void onEntityHit(EntityHitResult entityHitResult) {
+        if (!this.getWorld().isClient() && entityHitResult.getEntity() != this.getOwner()) {
+            explode();
+            if (!this.getWorld().isClient) {
+                this.getWorld().addParticle(
+                        ModParticles.RONOVA_PARTICLE,
+                        this.getX(), this.getY(), this.getZ(),
+                        0.0f, 0.0f, 0.0f
+                );
+            }
+        }
+    }
+
+    @Override
+    protected void onCollision(HitResult hitResult) {
+        super.onCollision(hitResult); // Обязательный вызов родительского метода
+
+        if (!this.getWorld().isClient()) {
+            if (hitResult.getType() == HitResult.Type.BLOCK) {
+                BlockHitResult blockHitResult = (BlockHitResult) hitResult;
+                BlockPos pos = blockHitResult.getBlockPos();
+                BlockState state = this.getWorld().getBlockState(pos);
+
+                // Проверяем, является ли блок твердым (полным кубом)
+
+                explode();
+
+            }
+        }
+    }
+
+    private void explode() {
+        World world = this.getWorld();
+
+        if (!world.isClient()) {
+            // 1. Создаем ванильный взрыв и наносим урон
+            world.createExplosion(this, this.getX(), this.getY(), this.getZ(), 5.0f, false, World.ExplosionSourceType.MOB);
+
+            // 2. Сначала отправляем сигнал клиенту, пока сущность еще существует
+            world.sendEntityStatus(this, (byte) 3);
+
+            // 3. Только после отправки удаляем снаряд
+            this.discard();
+        }
+    }
+
+    @Override
+    public void handleStatus(byte status) {
+        super.handleStatus(status);
+        // Получаем сигнал на клиенте и спавним партиклы
+        if (status == 3 && this.getWorld().isClient()) {
+            for (int i = 0; i < 30; ++i) {
+                double offsetX = this.random.nextDouble() * 2.0 - 1.0;
+                double offsetY = this.random.nextDouble() * 2.0 - 1.0;
+                double offsetZ = this.random.nextDouble() * 2.0 - 1.0;
+
+                this.getWorld().addParticle(
+                        ModParticles.RONOVA_PARTICLE,
+                        this.getX(), this.getY(), this.getZ(),
+                        offsetX * 0.2, offsetY * 0.2, offsetZ * 0.2
+                );
+            }
+        }
+    }
+
+    @Override
+    public void tick() {
+        // При спавне или в конструкторе/первом тике снаряда задаем скорость вперед по текущему повороту:
+        super.tick();
+        this.setNoGravity(true);
+
+        if(!this.getWorld().isClient){
+            net.minecraft.server.world.ServerWorld serverWorld = (net.minecraft.server.world.ServerWorld) this.getWorld();
+
+            serverWorld.spawnParticles(
+                    phoerion.genshinronovaboss.particle.ModParticles.RONOVA_TRAIL_PARTICLE,
+                    this.getX(), this.getY() + 0.2, this.getZ(), // Координаты центра снаряда
+                    1,                                           // Количество частиц за раз
+                    0.05, 0.05, 0.05,                            // Небольшой случайный разброс по осям
+                    0.0                                          // Скорость движения частиц
+            );
+        }
+
+    }
+
+    @Override
+    public boolean isInsideWaterOrBubbleColumn() {
+        return false;
+    }
+
+    @Override
+    public boolean isInLava() {
+        return false;
+    }
+
+    @Override
+    protected float getDragInWater() {
+        return 1.0f;
+    }
+
+}

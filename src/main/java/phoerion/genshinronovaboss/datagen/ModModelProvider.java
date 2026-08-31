@@ -20,5 +20,6 @@ public class ModModelProvider extends FabricModelProvider {
     @Override
     public void generateItemModels(ItemModelGenerator itemModelGenerator) {
         itemModelGenerator.register(ModItems.STELLAR_VISION, Models.GENERATED);
+        itemModelGenerator.register(ModItems.ICE_SWORD, Models.GENERATED);
     }
 }

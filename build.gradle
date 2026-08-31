@@ -9,6 +9,12 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
+	maven {
+		name = "GeckoLib"
+		url = "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/"
+	}
+
+
 }
 
 fabricApi {
@@ -25,6 +31,12 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	//modImplementation files("libs/photon-fabric-1.20.1-1.1.17.jar")
+
+	//modImplementation files("libs/photon-fabric-1.20.1-1.1.17-dev-shadow.jar")
+	modImplementation "software.bernie.geckolib:geckolib-fabric-1.20.1:4.4.4"
+
 }
 
 processResources {

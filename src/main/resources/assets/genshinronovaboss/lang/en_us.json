@@ -1,5 +1,8 @@
 {
   "itemgroup.grb" : "Genshin Ronova Boss Items",
 
-  "item.genshinronovaboss.stellar_vision": "Stellar Vision"
+  "item.genshinronovaboss.stellar_vision": "Stellar Vision",
+  "item.genshinronovaboss.ice_sword": "Ice Sword",
+
+  "key.genshinronovaboss.ability": "First Vision Ability"
 }

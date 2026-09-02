@@ -12,28 +12,25 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 import phoerion.genshinronovaboss.entity.ModEntities;
-import phoerion.genshinronovaboss.entity.client.ModModelLayers;
-import phoerion.genshinronovaboss.entity.client.RonovaModel;
 import phoerion.genshinronovaboss.entity.client.RonovaProjectileRenderer;
 import phoerion.genshinronovaboss.entity.client.RonovaRenderer;
+import phoerion.genshinronovaboss.entity.custom.RonovaEntity;
 import phoerion.genshinronovaboss.network.ModNetworking;
 import phoerion.genshinronovaboss.particle.ModParticles;
-import phoerion.genshinronovaboss.particle.RonovaExplosionParticle;
-import phoerion.genshinronovaboss.particle.custom.RonovaChargeParticle;
-import phoerion.genshinronovaboss.particle.custom.RonovaTrailParticle;
+import phoerion.genshinronovaboss.particle.custom.*;
 
 public class GenshinRonovaBossClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
 
         EntityRendererRegistry.register(ModEntities.RONOVA_BOSS, RonovaRenderer::new);
-        EntityModelLayerRegistry.registerModelLayer(ModModelLayers.RONOVA, RonovaModel::getTexturedModelData);
 
         EntityRendererRegistry.register(ModEntities.PROJECTILE, RonovaProjectileRenderer::new);
 
         ParticleFactoryRegistry.getInstance().register(ModParticles.RONOVA_PARTICLE, RonovaExplosionParticle.Factory::new);
         ParticleFactoryRegistry.getInstance().register(ModParticles.RONOVA_CHARGE_PARTICLE, RonovaChargeParticle.Factory::new);
         ParticleFactoryRegistry.getInstance().register(ModParticles.RONOVA_TRAIL_PARTICLE, RonovaTrailParticle.Factory::new);
+        ParticleFactoryRegistry.getInstance().register(ModParticles.RONOVA_EYE_PARTICLE, RonovaEyeParticle.Factory::new);
 
 
         final KeyBinding firstVisionAbilityKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(

@@ -23,7 +23,7 @@ public class RonovaProjectileRenderer extends GeoEntityRenderer<RonovaProjectile
     public RonovaProjectileRenderer(EntityRendererFactory.Context ctx) {
         super(ctx, new RonovaProjectileModel());
         this.shadowRadius = 0;
-        this.withScale(4.0f);
+        this.withScale(5.0f);
 
         this.addRenderLayer(new AutoGlowingGeoLayer<>(this));
 

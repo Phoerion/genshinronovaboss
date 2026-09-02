@@ -1,4 +1,4 @@
-package phoerion.genshinronovaboss.particle;
+package phoerion.genshinronovaboss.particle.custom;
 
 import net.minecraft.client.particle.*;
 import net.minecraft.client.world.ClientWorld;
@@ -15,7 +15,7 @@ public class RonovaExplosionParticle extends SpriteBillboardParticle {
 
         this.setSprite(spriteSet.getSprite(this.random)); // Используем переданный провайдер для установки спрайта
 
-        this.scale = 4.0f;
+        this.scale = 5.0f;
         this.maxAge = 40;
         this.gravityStrength = 0.0f;
         this.alpha = 1.0f;

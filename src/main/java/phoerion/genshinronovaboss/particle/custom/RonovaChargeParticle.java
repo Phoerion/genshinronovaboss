@@ -3,7 +3,6 @@ package phoerion.genshinronovaboss.particle.custom;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particle.DefaultParticleType;
-import phoerion.genshinronovaboss.particle.RonovaExplosionParticle;
 
 public class RonovaChargeParticle extends SpriteBillboardParticle {
     protected RonovaChargeParticle(ClientWorld clientWorld, double d, double e, double f, SpriteProvider spriteProvider) {

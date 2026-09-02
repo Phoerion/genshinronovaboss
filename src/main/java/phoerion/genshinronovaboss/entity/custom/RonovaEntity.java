@@ -1,6 +1,7 @@
 package phoerion.genshinronovaboss.entity.custom;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.AnimationState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.control.FlightMoveControl;
@@ -12,19 +13,35 @@ import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageTypes;
+import net.minecraft.entity.data.DataTracker;
+import net.minecraft.entity.data.TrackedData;
+import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import phoerion.genshinronovaboss.entity.ai.RonovaAttackGoal;
 import phoerion.genshinronovaboss.entity.ai.RonovaNavigation;
+import software.bernie.geckolib.animatable.GeoEntity;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.RawAnimation;
+import software.bernie.geckolib.core.object.PlayState;
+import software.bernie.geckolib.util.GeckoLibUtil;
 
 
+public class RonovaEntity extends PathAwareEntity implements GeoEntity {
+    private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+    public final AnimationState idle = new AnimationState();
+    public final AnimationState attack = new AnimationState();
+    private boolean isAttackingAnim = false;
 
-public class RonovaEntity extends PathAwareEntity {
     public RonovaEntity(EntityType<? extends PathAwareEntity> entityType, World world) {
         super(entityType, world);
 
@@ -60,11 +77,11 @@ public class RonovaEntity extends PathAwareEntity {
         return MobEntity.createMobAttributes()
                 .add(EntityAttributes.GENERIC_FLYING_SPEED, 1.0D)
                 .add(EntityAttributes.GENERIC_ATTACK_SPEED, 1.0D)
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 300.0D)
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 1000.0D)
                 .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 100.0D)
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 15.0D)
                 .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 1000.0D)
-                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 50.0D);
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 64.0D);
     }
 
     @Override
@@ -102,5 +119,43 @@ public class RonovaEntity extends PathAwareEntity {
                 this.setVelocity(this.getVelocity().x, (targetY - currentY) * 0.1, this.getVelocity().z);
             }
         }
+
+    }
+
+    public void triggerAttackAnimation() {
+        this.triggerAnim("controller", "attack");// Длительность в тиках (зависит от длины анимации)
+    }
+
+    public void triggerTPAttackAnimation() {
+        this.triggerAnim("controller", "tpAttack");// Длительность в тиках (зависит от длины анимации)
+    }
+
+    @Override
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
+        controllers.add(new AnimationController<>(this, "controller", 0, state -> {
+            // Базовая анимация по умолчанию
+            state.getController().setAnimation(RawAnimation.begin().thenLoop("idle"));
+            return PlayState.CONTINUE;
+        }).triggerableAnim("tpAttack", RawAnimation.begin().thenPlay("tpAttack")).triggerableAnim("attack", RawAnimation.begin().thenPlay("attack"))); // Регистрируем триггер атаки
+    }
+
+    @Override
+    public AnimatableInstanceCache getAnimatableInstanceCache() {
+        return this.cache;
+    }
+
+    @Override
+    public boolean isInsideWall() {
+        this.getPos().add(0.0f, 1.0f, 0.0f);
+        return false;
+    }
+
+    @Override
+    public boolean damage(net.minecraft.entity.damage.DamageSource source, float amount) {
+        // Если источник урона — удушье внутри стены, полностью отменяем урон
+        if (source.isOf(net.minecraft.entity.damage.DamageTypes.IN_WALL) || source.isOf(DamageTypes.EXPLOSION)) {
+            return false;
+        }
+        return super.damage(source, amount);
     }
 }

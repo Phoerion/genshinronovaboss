@@ -26,6 +26,16 @@ public class ModEntities {
                     .build()
     );
 
+    public static final EntityType<RonovaProjectileEntity> BURST_PROJECTILE = Registry.register(
+            Registries.ENTITY_TYPE,
+            new Identifier("genshinronovaboss", "ronova_busrt_projectile"),
+            FabricEntityTypeBuilder.<RonovaProjectileEntity>create(SpawnGroup.MISC, RonovaProjectileEntity::new)
+                    .dimensions(EntityDimensions.fixed(0.6f, 0.6f))
+                    .trackRangeBlocks(64)
+                    .trackedUpdateRate(10)
+                    .build()
+    );
+
     public static void registerEntities(){
         GenshinRonovaBoss.LOGGER.info("Registering Entities for " + GenshinRonovaBoss.MOD_ID);
     }

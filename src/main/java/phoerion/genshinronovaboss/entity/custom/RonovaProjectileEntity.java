@@ -5,6 +5,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -14,6 +15,7 @@ import net.minecraft.world.World;
 import phoerion.genshinronovaboss.entity.ModEntities;
 import phoerion.genshinronovaboss.item.ModItems;
 import phoerion.genshinronovaboss.particle.ModParticles;
+import phoerion.genshinronovaboss.util.RonovaExplosionUtil;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.*;
@@ -21,6 +23,7 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 
 public class RonovaProjectileEntity extends PersistentProjectileEntity implements GeoEntity {
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
+    private int age;
 
     public RonovaProjectileEntity(World world, LivingEntity owner) {
         super(ModEntities.PROJECTILE, owner, world);
@@ -84,7 +87,7 @@ public class RonovaProjectileEntity extends PersistentProjectileEntity implement
 
         if (!world.isClient()) {
             // 1. Создаем ванильный взрыв и наносим урон
-            world.createExplosion(this, this.getX(), this.getY(), this.getZ(), 5.0f, false, World.ExplosionSourceType.MOB);
+            RonovaExplosionUtil.createShieldBreakingExplosion((ServerWorld) this.getWorld(), this.getOwner(), this.getPos());
 
             // 2. Сначала отправляем сигнал клиенту, пока сущность еще существует
             world.sendEntityStatus(this, (byte) 3);
@@ -121,14 +124,21 @@ public class RonovaProjectileEntity extends PersistentProjectileEntity implement
 
         if(!this.getWorld().isClient){
             net.minecraft.server.world.ServerWorld serverWorld = (net.minecraft.server.world.ServerWorld) this.getWorld();
+        }
 
+        if (this.getWorld() instanceof ServerWorld serverWorld) {
             serverWorld.spawnParticles(
                     phoerion.genshinronovaboss.particle.ModParticles.RONOVA_TRAIL_PARTICLE,
-                    this.getX(), this.getY() + 0.2, this.getZ(), // Координаты центра снаряда
-                    1,                                           // Количество частиц за раз
-                    0.05, 0.05, 0.05,                            // Небольшой случайный разброс по осям
-                    0.0                                          // Скорость движения частиц
+                    this.getX(), this.getY(), this.getZ(),
+                    1,
+                    0.05, 0.05, 0.05,
+                    0.0
             );
+        }
+
+        age++;
+        if(age >= 200){
+            this.discard();
         }
 
     }
@@ -147,5 +157,6 @@ public class RonovaProjectileEntity extends PersistentProjectileEntity implement
     protected float getDragInWater() {
         return 1.0f;
     }
+
 
 }

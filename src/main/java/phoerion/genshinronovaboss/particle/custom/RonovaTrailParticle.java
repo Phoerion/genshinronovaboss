@@ -3,12 +3,11 @@ package phoerion.genshinronovaboss.particle.custom;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particle.DefaultParticleType;
-import phoerion.genshinronovaboss.particle.RonovaExplosionParticle;
 
 public class RonovaTrailParticle extends SpriteBillboardParticle {
     protected RonovaTrailParticle(ClientWorld clientWorld, double d, double e, double f, SpriteProvider spriteProvider) {
         super(clientWorld, d, e, f);
-        this.scale = 1.0f;
+        this.scale = 1.5f;
         this.maxAge = 20;
         this.gravityStrength = 0.0f;
         this.alpha = 1.0f;

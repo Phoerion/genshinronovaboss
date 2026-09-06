@@ -3,7 +3,13 @@
 	"package": "phoerion.genshinronovaboss.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-
+		"HungerManagerMixin",
+		"LivingEntityMixin",
+		"PlayerEntityMixin",
+		"BackgroundRendererMixin",
+		"ClientWorldSkyMixin",
+		"OverworldDimensionEffectsMixin",
+		"WorldRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

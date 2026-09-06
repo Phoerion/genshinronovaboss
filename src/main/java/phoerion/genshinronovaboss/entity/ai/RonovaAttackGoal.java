@@ -8,6 +8,7 @@ import org.apache.logging.log4j.core.jmx.Server;
 import phoerion.genshinronovaboss.entity.custom.RonovaBurstProjectile;
 import phoerion.genshinronovaboss.entity.custom.RonovaEntity;
 import phoerion.genshinronovaboss.entity.custom.RonovaProjectileEntity;
+import phoerion.genshinronovaboss.entity.custom.RonovaSlashProjectile;
 import phoerion.genshinronovaboss.particle.ModParticles;
 
 import java.util.EnumSet;
@@ -19,8 +20,10 @@ public class RonovaAttackGoal extends Goal {
     private int timeTillTp;
     private int timeTillBurst;
     private int keepShootingTime;
+    private int slashCooldown;
     private boolean isAttacking;
     private boolean isTpAttacking; // Отдельный флаг для телепортации, чтобы не ломать обычную стрельбу
+    private boolean isSlashAttacking;
 
     public RonovaAttackGoal(RonovaEntity mob) {
         this.mob = mob;
@@ -37,11 +40,13 @@ public class RonovaAttackGoal extends Goal {
     public void start() {
         this.cooldown = 80;
         this.tpCooldown = 400; // Интервал между телепортациями
+        this.slashCooldown = 350;
         this.timeTillTp = 0;
         this.timeTillBurst = 0;
         this.keepShootingTime = 0;
         this.isAttacking = false;
         this.isTpAttacking = false;
+        this.isSlashAttacking = false;
     }
 
     @Override
@@ -49,6 +54,7 @@ public class RonovaAttackGoal extends Goal {
         this.mob.setAttacking(false);
         this.isAttacking = false;
         this.isTpAttacking = false;
+        this.isSlashAttacking = false;
     }
 
     @Override
@@ -60,22 +66,32 @@ public class RonovaAttackGoal extends Goal {
     public void tick() {
         LivingEntity target = this.mob.getTarget();
         if (target == null) return;
+        if(this.mob.isTryingToEscape) return;
 
         this.mob.getLookControl().lookAt(target, 30.0F, 30.0F);
         double distanceSquared = this.mob.squaredDistanceTo(target.getX(), target.getY(), target.getZ());
 
         // 1. Обычная стрельба шарами (если не занят телепортацией)
-        if (!this.isTpAttacking) {
+        if (!this.isTpAttacking && !this.isSlashAttacking) {
             if (this.cooldown > 0) {
                 this.cooldown--;
             }
-            if (this.cooldown <= 40 && distanceSquared <= 4096.0) {
+            if (this.cooldown <= 40 && distanceSquared <= 10000.0) {
                 this.shoot(target);
             }
         }
 
+        if(!this.isTpAttacking && !this.isAttacking){
+            if(this.slashCooldown > 0){
+                this.slashCooldown --;
+            }
+            if (this.slashCooldown <= 25 && distanceSquared <= 10000.0) {
+                this.slashShoot(target);
+            }
+        }
+
         // 2. Логика таймера телепортации
-        if (!this.isTpAttacking) {
+        if (!this.isTpAttacking && !this.isSlashAttacking) {
             if (this.tpCooldown > 0) {
                 this.tpCooldown--;
             } else {
@@ -92,7 +108,7 @@ public class RonovaAttackGoal extends Goal {
             float distance = this.mob.distanceTo(target);
             if (distance >= 32.0F) {
                 this.isTpAttacking = true;
-                this.tpCooldown = 400;
+                this.tpCooldown = 450;
                 this.timeTillTp = 10;
                 this.timeTillBurst = 25;
                 this.mob.triggerTPAttackAnimation();
@@ -131,6 +147,30 @@ public class RonovaAttackGoal extends Goal {
             if (this.keepShootingTime == 0) {
                 this.isTpAttacking = false; // Возвращаем босса к обычному поведению
             }
+        }
+    }
+
+    private void slashShoot(LivingEntity target) {
+        if (this.slashCooldown == 25) {
+            if (!this.isSlashAttacking) {
+                this.mob.triggerSlashAttackAnimation();
+                this.isSlashAttacking = true;
+            }
+        }
+
+        if (this.slashCooldown == 0) {
+            this.slashCooldown = 350;
+            Vec3d look = this.mob.getRotationVector();
+            RonovaSlashProjectile projectile = new RonovaSlashProjectile(this.mob.getWorld(), this.mob);
+            projectile.setPosition(this.mob.getX() + look.x * 1.5, this.mob.getEyeY() - 5.2, this.mob.getZ() +  look.z * 1.5);
+
+            double dX = target.getX() - this.mob.getX();
+            double dY = target.getEyeY() - projectile.getY();
+            double dZ = target.getZ() - this.mob.getZ();
+
+            projectile.setVelocity(dX, dY, dZ, 1.0F, 0.0001f);
+            this.mob.getWorld().spawnEntity(projectile);
+            this.isSlashAttacking = false;
         }
     }
 

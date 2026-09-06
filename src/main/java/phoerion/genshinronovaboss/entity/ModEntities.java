@@ -10,6 +10,7 @@ import net.minecraft.util.Identifier;
 import phoerion.genshinronovaboss.GenshinRonovaBoss;
 import phoerion.genshinronovaboss.entity.custom.RonovaEntity;
 import phoerion.genshinronovaboss.entity.custom.RonovaProjectileEntity;
+import phoerion.genshinronovaboss.entity.custom.RonovaSlashProjectile;
 
 public class ModEntities {
     public static final EntityType<RonovaEntity> RONOVA_BOSS = Registry.register(Registries.ENTITY_TYPE,
@@ -28,9 +29,19 @@ public class ModEntities {
 
     public static final EntityType<RonovaProjectileEntity> BURST_PROJECTILE = Registry.register(
             Registries.ENTITY_TYPE,
-            new Identifier("genshinronovaboss", "ronova_busrt_projectile"),
+            new Identifier("genshinronovaboss", "ronova_burst_projectile"),
             FabricEntityTypeBuilder.<RonovaProjectileEntity>create(SpawnGroup.MISC, RonovaProjectileEntity::new)
                     .dimensions(EntityDimensions.fixed(0.6f, 0.6f))
+                    .trackRangeBlocks(64)
+                    .trackedUpdateRate(10)
+                    .build()
+    );
+
+    public static final EntityType<RonovaSlashProjectile> RONOVA_SLASH_PROJECTILE = Registry.register(
+            Registries.ENTITY_TYPE,
+            new Identifier("genshinronovaboss", "ronova_slash_projectile"),
+            FabricEntityTypeBuilder.<RonovaSlashProjectile>create(SpawnGroup.MISC, RonovaSlashProjectile::new)
+                    .dimensions(EntityDimensions.fixed(2.0f, 15.0f))
                     .trackRangeBlocks(64)
                     .trackedUpdateRate(10)
                     .build()

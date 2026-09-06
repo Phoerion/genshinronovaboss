@@ -2,6 +2,7 @@ package phoerion.genshinronovaboss.util;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.server.world.ServerWorld;
@@ -9,14 +10,16 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
+import phoerion.genshinronovaboss.effects.ModEffects;
 import phoerion.genshinronovaboss.particle.ModParticles;
 
 public class RonovaExplosionUtil {
 
     public static void createShieldBreakingExplosion(ServerWorld world, Entity sourceEntity, Vec3d pos) {
-        float power = 3.0f;
-        float damage = 100.0f;
+        float power = 0.0f;
+        float damage = 30.0f;
         float box = 6.0f;
         int radius = (int) Math.ceil(power);
 
@@ -73,6 +76,11 @@ public class RonovaExplosionUtil {
 
                 // Нанесение урона
                 entity.damage(world.getDamageSources().explosion(null, sourceEntity), damage);
+
+                Random random = world.getRandom();
+                if(random.nextFloat() <= 0.3f){
+                    entity.addStatusEffect(new StatusEffectInstance(ModEffects.RONOVA_CURSE, 200, 0, false, true));
+                }
 
                 // Мощный отброс от эпицентра взрыва (усилен под силу 6.0)
                 double dX = entity.getX() - pos.x;

@@ -6,12 +6,16 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageType;
 import net.minecraft.entity.damage.DamageTypes;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
+import phoerion.genshinronovaboss.effects.ModEffects;
 import phoerion.genshinronovaboss.entity.ModEntities;
 import phoerion.genshinronovaboss.particle.custom.RonovaEyeParticle;
 import software.bernie.geckolib.animatable.GeoEntity;
@@ -33,7 +37,7 @@ public class RonovaBurstProjectile extends PersistentProjectileEntity implements
 
     @Override
     protected ItemStack asItemStack() {
-        return null;
+        return ItemStack.EMPTY;
     }
 
     @Override
@@ -54,55 +58,65 @@ public class RonovaBurstProjectile extends PersistentProjectileEntity implements
             this.discard();
         }
 
-        if (!this.getWorld().isClient()) {
-            // Находим ближайшую живую сущность в радиусе 16 блоков (или используем конкретную цель)
-            LivingEntity owner = this.getOwner().getControllingPassenger();
-            LivingEntity target = null;
-            if(owner instanceof RonovaEntity ronova){
-                target = ronova.getTarget();
-            }
+ //       if (!this.getWorld().isClient()) {
+//            // Находим ближайшую живую сущность в радиусе 16 блоков (или используем конкретную цель)
+//
+//            LivingEntity target = null;
+//            if(this.getOwner() instanceof RonovaEntity ronova){
+//                target = ronova.getTarget();
+//            }
+//
+//            if (target != null) {
+//                // 1. Получаем текущую скорость снаряда
+//                Vec3d currentVelocity = this.getVelocity();
+//
+//                // 2. Считаем вектор от снаряда к цели
+//                Vec3d targetDir = new Vec3d(
+//                        target.getX() - this.getX(),
+//                        target.getEyeY() - this.getY(),
+//                        target.getZ() - this.getZ()
+//                ).normalize().multiply(1.5); // 1.5 — скорость снаряда
+//
+//                // 3. Плавное наведение (интерполяция): старая скорость + немного нового направления
+//                // Чем меньше коэффициент (например, 0.1), тем плавнее и "тяжелее" поворачивает снаряд
+//                double smoothness = 0.1;
+//                Vec3d newVelocity = new Vec3d(
+//                        currentVelocity.x + (targetDir.x - currentVelocity.x) * smoothness,
+//                        currentVelocity.y + (targetDir.y - currentVelocity.y) * smoothness,
+//                        currentVelocity.z + (targetDir.z - currentVelocity.z) * smoothness
+//                );
+//
+//                // 4. Применяем новую скорость и обновляем направление взгляда снаряда
+//                this.setVelocity(newVelocity);
+//                this.velocityModified = true;
+//            }
+//        }
+    }
 
-            if (target != null) {
-                // 1. Получаем текущую скорость снаряда
-                Vec3d currentVelocity = this.getVelocity();
+    @Override
+    protected void onEntityHit(EntityHitResult entityHitResult) {
+        if(!this.getWorld().isClient) {
+            if (entityHitResult.getEntity() != this.getOwner()) {
+                entityHitResult.getEntity().damage(this.getWorld().getDamageSources().magic(),
+                        10.0f);
 
-                // 2. Считаем вектор от снаряда к цели
-                Vec3d targetDir = new Vec3d(
-                        target.getX() - this.getX(),
-                        target.getEyeY() - this.getY(),
-                        target.getZ() - this.getZ()
-                ).normalize().multiply(1.5); // 1.5 — скорость снаряда
+                Random random = this.getWorld().getRandom();
+                if(random.nextFloat() <= 0.2f && entityHitResult.getEntity() instanceof PlayerEntity player){
+                    player.addStatusEffect(new StatusEffectInstance(ModEffects.RONOVA_CURSE, 200, 0, false, true));
+                }
 
-                // 3. Плавное наведение (интерполяция): старая скорость + немного нового направления
-                // Чем меньше коэффициент (например, 0.1), тем плавнее и "тяжелее" поворачивает снаряд
-                double smoothness = 0.1;
-                Vec3d newVelocity = new Vec3d(
-                        currentVelocity.x + (targetDir.x - currentVelocity.x) * smoothness,
-                        currentVelocity.y + (targetDir.y - currentVelocity.y) * smoothness,
-                        currentVelocity.z + (targetDir.z - currentVelocity.z) * smoothness
-                );
-
-                // 4. Применяем новую скорость и обновляем направление взгляда снаряда
-                this.setVelocity(newVelocity);
-                this.velocityModified = true;
+                this.discard();
             }
         }
     }
 
     @Override
-    protected void onEntityHit(EntityHitResult entityHitResult) {
-        super.onEntityHit(entityHitResult);
-        if(entityHitResult.getEntity() == this.getOwner())
-        entityHitResult.getEntity().damage(this.getWorld().getDamageSources().magic(),
-                10.0f);
-        this.discard();
-    }
-
-    @Override
     protected void onBlockCollision(BlockState state) {
         super.onBlockCollision(state);
-        if (state.isSolid()) {
-            this.discard();
+        if (!this.getWorld().isClient() && this.age > 5) {
+            if (!state.isAir()) {
+                this.discard(); // или ваша логика разрушения блоков
+            }
         }
     }
 

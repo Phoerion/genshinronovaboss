@@ -1,7 +1,9 @@
 package phoerion.genshinronovaboss.mixin;
 
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -42,6 +44,17 @@ public class PlayerEntityMixin {
                         true
                 ));
             }
+        }
+    }
+
+    @Inject(method = "onDeath", at = @At("HEAD"))
+    private void onPlayerDeath(DamageSource source, CallbackInfo ci) {
+        ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
+
+        // Здесь выполняется код при смерти игрока
+        // Например, проверка, убил ли его босс Ронова
+        if (source.getAttacker() instanceof phoerion.genshinronovaboss.entity.custom.RonovaEntity) {
+            player.addCommandTag("ronova_cursed");
         }
     }
 }

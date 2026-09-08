@@ -14,7 +14,7 @@ public class ClientWorldSkyMixin {
     private void changeRonovaSkyColor(Vec3d cameraPos, float tickDelta, CallbackInfoReturnable<Vec3d> cir) {
         if (ClientBossData.isRonovaFightActive) {
             // Кроваво-красный цвет (значения от 0.0 до 1.0)
-            cir.setReturnValue(new Vec3d(0.35D, 0.01D, 0.02D));
+            cir.setReturnValue(new Vec3d(0.6D, 0.1D, 0.15D));
         }
     }
 }

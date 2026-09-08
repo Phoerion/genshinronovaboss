@@ -8,7 +8,9 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 import phoerion.genshinronovaboss.GenshinRonovaBoss;
+import phoerion.genshinronovaboss.entity.client.RonovaEyeEntityRenderer;
 import phoerion.genshinronovaboss.entity.custom.RonovaEntity;
+import phoerion.genshinronovaboss.entity.custom.RonovaEyeEntity;
 import phoerion.genshinronovaboss.entity.custom.RonovaProjectileEntity;
 import phoerion.genshinronovaboss.entity.custom.RonovaSlashProjectile;
 
@@ -47,6 +49,15 @@ public class ModEntities {
                     .build()
     );
 
+    public static final EntityType<RonovaEyeEntity> RONOVA_EYE_ENTITY = Registry.register(
+            Registries.ENTITY_TYPE,
+            new Identifier("genshinronovaboss", "ronova_eye_entity"),
+            FabricEntityTypeBuilder.<RonovaEyeEntity>create(SpawnGroup.MISC, RonovaEyeEntity::new)
+                    .dimensions(EntityDimensions.fixed(2.0f, 2.0f))
+                    .trackRangeBlocks(64)
+                    .trackedUpdateRate(10)
+                    .build()
+    );
     public static void registerEntities(){
         GenshinRonovaBoss.LOGGER.info("Registering Entities for " + GenshinRonovaBoss.MOD_ID);
     }

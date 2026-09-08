@@ -11,6 +11,7 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 import phoerion.genshinronovaboss.entity.ModEntities;
+import phoerion.genshinronovaboss.entity.client.RonovaEyeEntityRenderer;
 import phoerion.genshinronovaboss.entity.client.RonovaProjectileRenderer;
 import phoerion.genshinronovaboss.entity.client.RonovaRenderer;
 import phoerion.genshinronovaboss.client.ClientBossData;
@@ -27,6 +28,7 @@ public class GenshinRonovaBossClient implements ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.RONOVA_BOSS, RonovaRenderer::new);
         EntityRendererRegistry.register(ModEntities.PROJECTILE, RonovaProjectileRenderer::new);
         EntityRendererRegistry.register(ModEntities.RONOVA_SLASH_PROJECTILE, RonovaSlashProjectileRenderer::new);
+        EntityRendererRegistry.register(ModEntities.RONOVA_EYE_ENTITY, RonovaEyeEntityRenderer::new);
 
         ParticleFactoryRegistry.getInstance().register(ModParticles.RONOVA_PARTICLE, RonovaExplosionParticle.Factory::new);
         ParticleFactoryRegistry.getInstance().register(ModParticles.RONOVA_CHARGE_PARTICLE, RonovaChargeParticle.Factory::new);

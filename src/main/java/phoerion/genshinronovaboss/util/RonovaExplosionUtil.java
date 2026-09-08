@@ -19,7 +19,7 @@ public class RonovaExplosionUtil {
 
     public static void createShieldBreakingExplosion(ServerWorld world, Entity sourceEntity, Vec3d pos) {
         float power = 0.0f;
-        float damage = 30.0f;
+        float damage = 20.0f;
         float box = 6.0f;
         int radius = (int) Math.ceil(power);
 
@@ -78,7 +78,7 @@ public class RonovaExplosionUtil {
                 entity.damage(world.getDamageSources().explosion(null, sourceEntity), damage);
 
                 Random random = world.getRandom();
-                if(random.nextFloat() <= 0.3f){
+                if(random.nextFloat() <= 0.2f){
                     entity.addStatusEffect(new StatusEffectInstance(ModEffects.RONOVA_CURSE, 200, 0, false, true));
                 }
 

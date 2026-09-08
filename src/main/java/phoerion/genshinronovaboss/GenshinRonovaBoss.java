@@ -16,6 +16,7 @@ import phoerion.genshinronovaboss.client.RonovaSkyRenderer;
 import phoerion.genshinronovaboss.effects.ModEffects;
 import phoerion.genshinronovaboss.entity.ModEntities;
 import phoerion.genshinronovaboss.entity.custom.RonovaEntity;
+import phoerion.genshinronovaboss.entity.custom.RonovaEyeEntity;
 import phoerion.genshinronovaboss.item.ModItemGroups;
 import phoerion.genshinronovaboss.item.ModItems;
 import phoerion.genshinronovaboss.network.ModNetworking;
@@ -49,6 +50,7 @@ public class GenshinRonovaBoss implements ModInitializer {
 
 
 		FabricDefaultAttributeRegistry.register(ModEntities.RONOVA_BOSS, RonovaEntity.createMobAttributes());
+		FabricDefaultAttributeRegistry.register(ModEntities.RONOVA_EYE_ENTITY, RonovaEyeEntity.createMobAttributes());
 
 		ClientPlayNetworking.registerGlobalReceiver(RonovaEntity.BOSS_STATE_PACKET_ID, (client, handler, buf, responseSender) -> {
 			boolean isActive = buf.readBoolean();

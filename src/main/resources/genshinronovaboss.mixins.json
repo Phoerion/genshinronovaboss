@@ -5,11 +5,7 @@
 	"mixins": [
 		"HungerManagerMixin",
 		"LivingEntityMixin",
-		"PlayerEntityMixin",
-		"BackgroundRendererMixin",
-		"ClientWorldSkyMixin",
-		"OverworldDimensionEffectsMixin",
-		"WorldRendererMixin"
+		"PlayerEntityMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

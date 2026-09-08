@@ -21,14 +21,12 @@ import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import phoerion.genshinronovaboss.effects.ModEffects;
@@ -45,11 +43,14 @@ import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 public class RonovaEntity extends PathAwareEntity implements GeoEntity {
 
+    private Set<RonovaEyeEntity> EYES = new HashSet<>();
     public static final Identifier BOSS_STATE_PACKET_ID = new Identifier("genshinronovaboss", "boss_state_packet");
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     public final AnimationState idle = new AnimationState();
@@ -64,6 +65,7 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
             "ronova_boss",
             Comparator.comparingLong(ChunkPos::toLong)
     );
+    private boolean hasShield;
 
     public RonovaEntity(EntityType<? extends PathAwareEntity> entityType, World world) {
         super(entityType, world);
@@ -122,7 +124,47 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
     public void tick() {
         super.tick();
         this.setNoGravity(true);
+        breakBlocksAround();
         //if(this.isOnGround())
+        this.EYES.clear(); // Важно очищать список каждый тик, чтобы старые/мертвые глаза удалялись
+        for (RonovaEyeEntity eye : this.getWorld().getEntitiesByClass(RonovaEyeEntity.class, this.getBoundingBox().expand(128), e -> e.isAlive() && e.getRonovaBoss() != null)) {
+            if(eye.getRonovaBoss().equals(this)) {
+                this.EYES.add(eye);
+                if(this.getWorld() instanceof ServerWorld serverWorld) {
+                    Vec3d eyePos = eye.getEyePos(); // Центр глаза миньона
+
+                    // Вычисляем вектор от босса до глаза
+                    Vec3d bossPos = this.getPos();
+                    Vec3d direction = eyePos.subtract(bossPos);
+                    double distance = direction.length();
+                    direction = direction.normalize();
+
+                    // Шаг расстановки партиклов (чем меньше, тем сплошнее будет луч)
+                    double step = 1.0;
+                    if(this.age % 5 == 0) {
+                        for (double d = 0; d < distance; d += step) {
+                            double currentX = bossPos.x + direction.x * d;
+                            double currentY = bossPos.y + direction.y * d;
+                            double currentZ = bossPos.z + direction.z * d;
+
+                            // Спавним партикл на каждой точке луча
+                            serverWorld.spawnParticles(
+                                    ParticleTypes.END_ROD, // Можно заменить на ваш кастомный партикл
+                                    currentX, currentY, currentZ,
+                                    1, // Количество партиклов в точке
+                                    0.0, 0.0, 0.0, 0.0f // Разброс
+                            );
+                        }
+                    }
+                }
+            }
+        }
+        if (!this.EYES.isEmpty()) {
+            tryCreatingShield();
+        }
+
+        this.hasShield = !EYES.isEmpty();
+
         if(!this.triedEscaping) {
             escapeCheck();
         }
@@ -156,6 +198,8 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
                 for (net.minecraft.entity.player.PlayerEntity player : players) {
                     player.addCommandTag("ronova_cursed");
                 }
+
+
             }
 
             this.discard();
@@ -172,6 +216,51 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
         defendFromProjectiles();
 
         updateChunks();
+    }
+
+    private void breakBlocksAround() {
+        if (this.getWorld().isClient()) return;
+
+        Box box = this.getBoundingBox().expand(0.5f);
+        ServerWorld serverWorld = (ServerWorld) this.getWorld();
+
+        for (int x = (int) Math.floor(box.minX); x <= (int) Math.floor(box.maxX); x++) {
+            for (int y = (int) Math.floor(box.minY); y <= (int) Math.floor(box.maxY); y++) {
+                for (int z = (int) Math.floor(box.minZ); z <= (int) Math.floor(box.maxZ); z++) {
+                    BlockPos pos = new BlockPos(x, y, z);
+                    BlockState state = serverWorld.getBlockState(pos);
+
+                    if (!state.isAir() && !state.isOf(net.minecraft.block.Blocks.BEDROCK)) {
+                        // 1. Полностью сносим блок на сервере
+                        serverWorld.setBlockState(pos, net.minecraft.block.Blocks.AIR.getDefaultState(), 3);
+
+                        // 2. Принудительно отправляем пакет всем игрокам поблизости,
+                        // чтобы клиент гарантированно стер коллизию и обновил рендер
+                        serverWorld.getChunkManager().markForUpdate(pos);
+                    }
+                }
+            }
+        }
+    }
+
+    private void tryCreatingShield() {
+        if (this.getWorld().isClient() && this.age % 2 == 0) { // Каждые 2 тика для оптимизации
+            double radius = 1.5; // Радиус щита
+            int particlesCount = 30; // Количество точек на сфере за один спавн
+
+            for (int i = 0; i < particlesCount; i++) {
+                // Углы для равномерного распределения по сфере (Fibonacci sphere или случайные)
+                double theta = this.getWorld().random.nextDouble() * Math.PI * 2;
+                double phi = Math.acos(this.getWorld().random.nextDouble() * 2 - 1);
+
+                double x = this.getX() + radius * Math.sin(phi) * Math.cos(theta);
+                double y = this.getY() + this.getHeight() / 2.0 + radius * Math.sin(phi) * Math.sin(theta);
+                double z = this.getZ() + radius * Math.cos(phi);
+
+                // Спавним партикл (например, портала, магии или кастомный)
+                this.getWorld().addParticle(ParticleTypes.DRAGON_BREATH, x, y, z, 0.0, 0.0, 0.0);
+            }
+        }
     }
 
     private void updateFlightHeight(){
@@ -291,7 +380,7 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
 
             // Задаем силу отталкивания (по горизонтали умножаем на 1.5, добавляем подброс вверх на 0.4)
             entity.setVelocity(dir.x * 1.5, 0.5, dir.z * 1.5);
-            entity.damage(this.getWorld().getDamageSources().magic(), 30.0f);
+            entity.damage(this.getWorld().getDamageSources().magic(), 10.0f);
 
             if(this.getWorld() instanceof ServerWorld serverWorld){
                 serverWorld.spawnParticles(
@@ -325,6 +414,10 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
         this.triggerAnim("controller", "slashAttack");// Длительность в тиках (зависит от длины анимации)
     }
 
+    public void triggerSummonAttackAnimation() {
+        this.triggerAnim("controller", "summon");// Длительность в тиках (зависит от длины анимации)
+    }
+
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "controller", 0, state -> {
@@ -338,6 +431,7 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
         })
                 .triggerableAnim("slashAttack", RawAnimation.begin().thenPlay("slashAttack"))
                 .triggerableAnim("tpAttack", RawAnimation.begin().thenPlay("tpAttack"))
+                .triggerableAnim("summon", RawAnimation.begin().thenPlay("summon"))
                 .triggerableAnim("attack", RawAnimation.begin().thenPlay("attack"))); // Регистрируем триггер атаки
     }
 
@@ -363,6 +457,10 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
             this.isTryingToEscape = false;
             this.escapeTicks = 0;
             this.triedEscaping = true; // Запрещаем повторный запуск побега до конца боя (по желанию)
+        }
+        if(this.hasShield == true){
+            source.getAttacker().damage(this.getWorld().getDamageSources().magic(), amount / 3);
+            amount = amount / 5;
         }
         return super.damage(source, amount);
     }

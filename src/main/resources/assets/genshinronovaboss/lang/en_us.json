@@ -6,5 +6,7 @@
   "item.genshinronovaboss.ronova_spawn_egg": "Ronova Spawn Egg",
   "effects.genshinronovaboss.ronova_curse": "Ronova Curse",
 
-  "key.genshinronovaboss.ability": "First Vision Ability"
+  "key.genshinronovaboss.ability": "First Vision Ability",
+
+  "entity.genshinronovaboss.ronova": "Ronova"
 }

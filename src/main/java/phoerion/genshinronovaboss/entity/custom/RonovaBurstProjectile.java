@@ -1,6 +1,7 @@
 package phoerion.genshinronovaboss.entity.custom;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -10,6 +11,7 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.Vec3d;
@@ -54,7 +56,7 @@ public class RonovaBurstProjectile extends PersistentProjectileEntity implements
     public void tick() {
         super.tick();
         age++;
-        if(age >= 40){
+        if(age >= 20){
             this.discard();
         }
 
@@ -96,13 +98,16 @@ public class RonovaBurstProjectile extends PersistentProjectileEntity implements
     @Override
     protected void onEntityHit(EntityHitResult entityHitResult) {
         if(!this.getWorld().isClient) {
+            if (entityHitResult.getEntity() instanceof PlayerEntity player && player.isUsingItem() && player.getActiveItem().isOf(Items.SHIELD)) {
+                this.discard();
+            }
             if (entityHitResult.getEntity() != this.getOwner()) {
                 entityHitResult.getEntity().damage(this.getWorld().getDamageSources().magic(),
-                        10.0f);
+                        5.0f);
 
                 Random random = this.getWorld().getRandom();
                 if(random.nextFloat() <= 0.2f && entityHitResult.getEntity() instanceof PlayerEntity player){
-                    player.addStatusEffect(new StatusEffectInstance(ModEffects.RONOVA_CURSE, 200, 0, false, true));
+                    player.addStatusEffect(new StatusEffectInstance(ModEffects.RONOVA_CURSE, 100, 0, false, true));
                 }
 
                 this.discard();
@@ -138,5 +143,10 @@ public class RonovaBurstProjectile extends PersistentProjectileEntity implements
     @Override
     public boolean hasNoGravity() {
         return true;
+    }
+
+    @Override
+    public void pushAwayFrom(Entity entity) {
+
     }
 }

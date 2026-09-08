@@ -29,8 +29,4 @@ public class RonovaNavigation extends BirdNavigation {
         // Если под мобом 3 блока воздуха → он слишком высоко
         return air1 && air2 && air3;
     }
-
-
-
-
 }

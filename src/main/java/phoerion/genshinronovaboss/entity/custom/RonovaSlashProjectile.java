@@ -5,12 +5,16 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import phoerion.genshinronovaboss.effects.ModEffects;
@@ -23,24 +27,20 @@ import software.bernie.geckolib.util.GeckoLibUtil;
 import java.util.HashSet;
 import java.util.Set;
 
-public class RonovaSlashProjectile extends PersistentProjectileEntity implements GeoEntity {
+public class RonovaSlashProjectile extends ProjectileEntity implements GeoEntity {
     private int age;
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private final Set<Entity> hitEntities = new HashSet<>();
 
-    public RonovaSlashProjectile(EntityType<? extends PersistentProjectileEntity> entityType, World world) {
+    public RonovaSlashProjectile(EntityType<? extends ProjectileEntity> entityType, World world) {
         super(entityType, world);
         this.noClip = true; // Полностью отключаем физику столкновений
     }
 
     public RonovaSlashProjectile(World world, LivingEntity owner) {
-        super(ModEntities.RONOVA_SLASH_PROJECTILE, owner, world);
+        super(ModEntities.RONOVA_SLASH_PROJECTILE, world);
+        this.setOwner(owner);
         this.noClip = true;
-    }
-
-    @Override
-    protected ItemStack asItemStack() {
-        return ItemStack.EMPTY;
     }
 
     @Override
@@ -53,10 +53,21 @@ public class RonovaSlashProjectile extends PersistentProjectileEntity implements
     }
 
     @Override
+    protected void initDataTracker() {
+
+    }
+
+    @Override
     public void tick() {
-        super.tick();
+
+        Vec3d velocity = this.getVelocity();
+        double nextX = this.getX() + velocity.x;
+        double nextY = this.getY() + velocity.y;
+        double nextZ = this.getZ() + velocity.z;
+        this.setPosition(nextX, nextY, nextZ);
+
         age++;
-        if (age >= 100) {
+        if (age >= 300) {
             this.discard();
             return;
         }
@@ -82,11 +93,18 @@ public class RonovaSlashProjectile extends PersistentProjectileEntity implements
             for (LivingEntity target : this.getWorld().getNonSpectatingEntities(LivingEntity.class, box)) {
                 if (target != this.getOwner() && !hitEntities.contains(target)) {
                     hitEntities.add(target); // Запоминаем цель, чтобы ударить ровно 1 раз за полет
-
-                    target.damage(
-                            this.getWorld().getDamageSources().indirectMagic(this, this.getOwner()),
-                            30.0f
-                    );
+                    if (target instanceof PlayerEntity player && player.isUsingItem() && player.getActiveItem().isOf(Items.SHIELD)) {
+                        target.damage(
+                                this.getWorld().getDamageSources().indirectMagic(this, this.getOwner()),
+                                15.0f
+                        );
+                    }
+                    else{
+                        target.damage(
+                                this.getWorld().getDamageSources().indirectMagic(this, this.getOwner()),
+                                25.0f
+                        );
+                    }
 
                     Random random = this.getWorld().getRandom();
                     if(random.nextFloat() <= 0.5f){
@@ -113,8 +131,8 @@ public class RonovaSlashProjectile extends PersistentProjectileEntity implements
     }
 
     @Override
-    protected float getDragInWater() {
-        return 1.0f;
+    public boolean isTouchingWater() {
+        return false;
     }
 
     @Override
@@ -141,4 +159,16 @@ public class RonovaSlashProjectile extends PersistentProjectileEntity implements
         super.setVelocity(x, y, z, speed, 0.0f);
         this.velocityModified = true;
     }
+
+    @Override
+    public void setOnGround(boolean onGround) {
+
+    }
+
+    @Override
+    public void setOnGround(boolean onGround, Vec3d movement) {
+
+    }
+
+
 }

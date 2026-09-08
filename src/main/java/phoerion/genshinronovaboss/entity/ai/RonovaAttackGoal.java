@@ -2,18 +2,20 @@ package phoerion.genshinronovaboss.entity.ai;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 import org.apache.logging.log4j.core.jmx.Server;
-import phoerion.genshinronovaboss.entity.custom.RonovaBurstProjectile;
-import phoerion.genshinronovaboss.entity.custom.RonovaEntity;
-import phoerion.genshinronovaboss.entity.custom.RonovaProjectileEntity;
-import phoerion.genshinronovaboss.entity.custom.RonovaSlashProjectile;
+import phoerion.genshinronovaboss.entity.custom.*;
 import phoerion.genshinronovaboss.particle.ModParticles;
 
 import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
 
 public class RonovaAttackGoal extends Goal {
+    private Set<RonovaEyeEntity> EYES = new HashSet<>();
     private final RonovaEntity mob;
     private int cooldown;
     private int tpCooldown;
@@ -24,6 +26,9 @@ public class RonovaAttackGoal extends Goal {
     private boolean isAttacking;
     private boolean isTpAttacking; // Отдельный флаг для телепортации, чтобы не ломать обычную стрельбу
     private boolean isSlashAttacking;
+    private boolean isSummonning;
+    private boolean areSummonsAlive;
+    private int summonCooldown;
 
     public RonovaAttackGoal(RonovaEntity mob) {
         this.mob = mob;
@@ -38,15 +43,17 @@ public class RonovaAttackGoal extends Goal {
 
     @Override
     public void start() {
-        this.cooldown = 80;
-        this.tpCooldown = 400; // Интервал между телепортациями
-        this.slashCooldown = 350;
+        this.cooldown = 120;
+        this.tpCooldown = 300; // Интервал между телепортациями
+        this.slashCooldown = 200;
+        this.summonCooldown = 300;
         this.timeTillTp = 0;
         this.timeTillBurst = 0;
         this.keepShootingTime = 0;
         this.isAttacking = false;
         this.isTpAttacking = false;
         this.isSlashAttacking = false;
+        this.isSummonning = false;
     }
 
     @Override
@@ -55,6 +62,7 @@ public class RonovaAttackGoal extends Goal {
         this.isAttacking = false;
         this.isTpAttacking = false;
         this.isSlashAttacking = false;
+        this.isSummonning = false;
     }
 
     @Override
@@ -68,11 +76,27 @@ public class RonovaAttackGoal extends Goal {
         if (target == null) return;
         if(this.mob.isTryingToEscape) return;
 
+        this.EYES.clear(); // Важно очищать список каждый тик, чтобы старые/мертвые глаза удалялись
+        for (RonovaEyeEntity eye : this.mob.getWorld().getEntitiesByClass(RonovaEyeEntity.class, this.mob.getBoundingBox().expand(128), e -> e.isAlive() && e.getRonovaBoss() != null)) {
+            if(eye.getRonovaBoss().equals(this.mob))
+                this.EYES.add(eye);
+        }
+
+        this.areSummonsAlive = !this.EYES.isEmpty();
+
         this.mob.getLookControl().lookAt(target, 30.0F, 30.0F);
         double distanceSquared = this.mob.squaredDistanceTo(target.getX(), target.getY(), target.getZ());
 
+        if (!this.isTpAttacking && !this.isSlashAttacking && !this.isAttacking && !this.areSummonsAlive) {
+            if (this.summonCooldown > 0) {
+                this.summonCooldown--;
+            }
+            if (this.summonCooldown <= 40 && distanceSquared <= 1000.0) {
+                this.summonEyes();
+            }
+        }
         // 1. Обычная стрельба шарами (если не занят телепортацией)
-        if (!this.isTpAttacking && !this.isSlashAttacking) {
+        if (!this.isTpAttacking && !this.isSlashAttacking && !this.isSummonning) {
             if (this.cooldown > 0) {
                 this.cooldown--;
             }
@@ -81,7 +105,7 @@ public class RonovaAttackGoal extends Goal {
             }
         }
 
-        if(!this.isTpAttacking && !this.isAttacking){
+        if(!this.isTpAttacking && !this.isAttacking && !this.isSummonning){
             if(this.slashCooldown > 0){
                 this.slashCooldown --;
             }
@@ -91,13 +115,13 @@ public class RonovaAttackGoal extends Goal {
         }
 
         // 2. Логика таймера телепортации
-        if (!this.isTpAttacking && !this.isSlashAttacking) {
+        if (!this.isTpAttacking && !this.isSlashAttacking && !this.isSummonning) {
             if (this.tpCooldown > 0) {
                 this.tpCooldown--;
             } else {
                 // Время запускать ТП-атаку
                 this.isTpAttacking = true;
-                this.tpCooldown = 400;
+                this.tpCooldown = 300;
                 this.timeTillTp = 10;   // Через 2 тика телепортируемся
                 this.timeTillBurst = 25; // Через 6 тиков начинаем стрелять очередью
                 this.mob.triggerTPAttackAnimation();
@@ -108,7 +132,7 @@ public class RonovaAttackGoal extends Goal {
             float distance = this.mob.distanceTo(target);
             if (distance >= 32.0F) {
                 this.isTpAttacking = true;
-                this.tpCooldown = 450;
+                this.tpCooldown = 300;
                 this.timeTillTp = 10;
                 this.timeTillBurst = 25;
                 this.mob.triggerTPAttackAnimation();
@@ -150,6 +174,28 @@ public class RonovaAttackGoal extends Goal {
         }
     }
 
+    private void summonEyes() {
+        if(!this.mob.getWorld().isClient) {
+            if (this.summonCooldown == 40) {
+                this.isSummonning = true;
+                this.mob.triggerSummonAttackAnimation();
+            }
+            if(this.summonCooldown == 0){
+                for(int i = 0; i <=2; i++){
+                    RonovaEyeEntity eyeEntity = new RonovaEyeEntity(this.mob.getWorld(), this.mob);
+                    eyeEntity.setRonova(this.mob);
+                    Random random = this.mob.getWorld().getRandom();
+                    eyeEntity.setPosition(this.mob.getX() -20 + random.nextInt(41), this.mob.getEyeY(), this.mob.getZ() -20 + random.nextInt(41));
+
+                    this.mob.getWorld().spawnEntity(eyeEntity);
+                }
+                this.summonCooldown = 300;
+                this.isSummonning = false;
+            }
+        }
+
+    }
+
     private void slashShoot(LivingEntity target) {
         if (this.slashCooldown == 25) {
             if (!this.isSlashAttacking) {
@@ -159,7 +205,7 @@ public class RonovaAttackGoal extends Goal {
         }
 
         if (this.slashCooldown == 0) {
-            this.slashCooldown = 350;
+            this.slashCooldown = 200;
             Vec3d look = this.mob.getRotationVector();
             RonovaSlashProjectile projectile = new RonovaSlashProjectile(this.mob.getWorld(), this.mob);
             projectile.setPosition(this.mob.getX() + look.x * 1.5, this.mob.getEyeY() - 5.2, this.mob.getZ() +  look.z * 1.5);

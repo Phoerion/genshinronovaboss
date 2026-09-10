@@ -17,6 +17,5 @@ public class ModItemGroups {
 
     public static void registerItemGroups(){
         GenshinRonovaBoss.LOGGER.info("Registering Item Groups" + GenshinRonovaBoss.MOD_ID);
-
     }
 }

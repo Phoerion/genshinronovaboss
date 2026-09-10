@@ -96,13 +96,14 @@ public class RonovaSlashProjectile extends ProjectileEntity implements GeoEntity
                     if (target instanceof PlayerEntity player && player.isUsingItem() && player.getActiveItem().isOf(Items.SHIELD)) {
                         target.damage(
                                 this.getWorld().getDamageSources().indirectMagic(this, this.getOwner()),
-                                15.0f
+                                10.0f
                         );
+                        player.disableShield(true);
                     }
                     else{
                         target.damage(
                                 this.getWorld().getDamageSources().indirectMagic(this, this.getOwner()),
-                                25.0f
+                                20.0f
                         );
                     }
 

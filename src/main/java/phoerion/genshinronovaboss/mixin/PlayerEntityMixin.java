@@ -1,5 +1,6 @@
 package phoerion.genshinronovaboss.mixin;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -33,12 +34,12 @@ public class PlayerEntityMixin {
         PlayerEntity player = (PlayerEntity) (Object) this;
 
         // Если у игрока есть постоянный тег проклятия
-        if (player.getCommandTags().contains("ronova_cursed")) {
+        if (player.getCommandTags().contains("ronova_cursed") && !player.getCommandTags().contains("ronova")) {
             // Если эффект пропал (например, от молока), принудительно возвращаем его
-            if (!player.hasStatusEffect(phoerion.genshinronovaboss.effects.ModEffects.RONOVA_CURSE)) {
+            if (player.age % 10 == 0) {
                 player.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
                         phoerion.genshinronovaboss.effects.ModEffects.RONOVA_CURSE,
-                        Integer.MAX_VALUE,
+                        200,
                         0,
                         false,
                         true
@@ -51,9 +52,16 @@ public class PlayerEntityMixin {
     private void onPlayerDeath(DamageSource source, CallbackInfo ci) {
         ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
 
-        // Здесь выполняется код при смерти игрока
-        // Например, проверка, убил ли его босс Ронова
-        if (source.getAttacker() instanceof phoerion.genshinronovaboss.entity.custom.RonovaEntity) {
+        Entity attacker = source.getAttacker();
+        Entity directSource = source.getSource();
+
+        // Проверяем, нанес ли удар сам босс, его миньон или их снаряды
+        boolean isRonovaRelated =
+                attacker instanceof phoerion.genshinronovaboss.entity.custom.RonovaEntity ||
+                        attacker instanceof phoerion.genshinronovaboss.entity.custom.RonovaEyeEntity ||
+                        directSource instanceof phoerion.genshinronovaboss.entity.custom.RonovaProjectileEntity;
+
+        if (isRonovaRelated) {
             player.addCommandTag("ronova_cursed");
         }
     }

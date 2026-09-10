@@ -13,6 +13,8 @@ import net.minecraft.entity.ai.pathing.BirdNavigation;
 import net.minecraft.entity.ai.pathing.EntityNavigation;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.boss.BossBar;
+import net.minecraft.entity.boss.ServerBossBar;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -20,6 +22,8 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -49,6 +53,11 @@ import java.util.Set;
 
 
 public class RonovaEntity extends PathAwareEntity implements GeoEntity {
+    private final ServerBossBar bossBar = (ServerBossBar) new ServerBossBar(
+            this.getDisplayName(),
+            BossBar.Color.RED,
+            BossBar.Style.PROGRESS
+    ).setDarkenSky(true);
 
     private Set<RonovaEyeEntity> EYES = new HashSet<>();
     public static final Identifier BOSS_STATE_PACKET_ID = new Identifier("genshinronovaboss", "boss_state_packet");
@@ -125,7 +134,10 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
         super.tick();
         this.setNoGravity(true);
         breakBlocksAround();
-        //if(this.isOnGround())
+        for (PlayerEntity player : this.getWorld().getEntitiesByClass(PlayerEntity.class, this.getBoundingBox().expand(128), e -> e.isAlive())) {
+            disableElytra(player);
+        }
+        updateBossBar();
         this.EYES.clear(); // Важно очищать список каждый тик, чтобы старые/мертвые глаза удалялись
         for (RonovaEyeEntity eye : this.getWorld().getEntitiesByClass(RonovaEyeEntity.class, this.getBoundingBox().expand(128), e -> e.isAlive() && e.getRonovaBoss() != null)) {
             if(eye.getRonovaBoss().equals(this)) {
@@ -216,6 +228,55 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
         defendFromProjectiles();
 
         updateChunks();
+    }
+
+    private void updateBossBar() {
+        if (!this.getWorld().isClient()) {
+            // Обновляем значение прогресса полоски на основе текущего здоровья босса
+            this.bossBar.setPercent(this.getHealth() / this.getMaxHealth());
+
+            // Управляем игроками в радиусе видимости (например, 64 блоков)
+            Box trackingBox = this.getBoundingBox().expand(64.0D);
+            List<ServerPlayerEntity> nearbyPlayers = this.getWorld().getEntitiesByClass(
+                    ServerPlayerEntity.class,
+                    trackingBox,
+                    LivingEntity::isAlive
+            );
+
+            // Добавляем новых игроков в область видимости босс-бара
+            for (ServerPlayerEntity player : nearbyPlayers) {
+                if (!this.bossBar.getPlayers().contains(player)) {
+                    this.bossBar.addPlayer(player);
+                }
+            }
+
+            // Удаляем из бара игроков, которые отошли далеко или умерли
+            List<ServerPlayerEntity> barPlayers = new java.util.ArrayList<>(this.bossBar.getPlayers());
+            for (ServerPlayerEntity player : barPlayers) {
+                if (!nearbyPlayers.contains(player) || player.isSpectator() || !player.isAlive()) {
+                    this.bossBar.removePlayer(player);
+                }
+            }
+        }
+    }
+
+    private void disableElytra(PlayerEntity player) {
+        if (!player.getWorld().isClient()) {
+            ItemStack elytraStack = player.getEquippedStack(net.minecraft.entity.EquipmentSlot.CHEST);
+
+            if (elytraStack.getItem() instanceof net.minecraft.item.ElytraItem) {
+                // Очищаем слот
+                player.equipStack(net.minecraft.entity.EquipmentSlot.CHEST, ItemStack.EMPTY);
+
+                // Пытаемся положить в инвентарь игрока
+                boolean added = player.getInventory().insertStack(elytraStack);
+
+                // Если инвентарь полон, дропаем предмет на землю возле игрока
+                if (!added) {
+                    player.dropItem(elytraStack, false);
+                }
+            }
+        }
     }
 
     private void breakBlocksAround() {
@@ -379,7 +440,7 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
             Vec3d dir = entity.getPos().subtract(this.getPos()).normalize();
 
             // Задаем силу отталкивания (по горизонтали умножаем на 1.5, добавляем подброс вверх на 0.4)
-            entity.setVelocity(dir.x * 1.5, 0.5, dir.z * 1.5);
+            entity.setVelocity(dir.x * 2.0, 1.5, dir.z * 2.0);
             entity.damage(this.getWorld().getDamageSources().magic(), 10.0f);
 
             if(this.getWorld() instanceof ServerWorld serverWorld){
@@ -452,15 +513,18 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
         if (source.isOf(net.minecraft.entity.damage.DamageTypes.IN_WALL) || source.isOf(DamageTypes.EXPLOSION) || source.isOf(DamageTypes.ARROW) || source.isOf(DamageTypes.FREEZE)) {
             return false;
         }
-
-        if (this.isTryingToEscape) {
-            this.isTryingToEscape = false;
-            this.escapeTicks = 0;
-            this.triedEscaping = true; // Запрещаем повторный запуск побега до конца боя (по желанию)
+        if(source.getAttacker() != null) {
+            if (this.isTryingToEscape) {
+                this.isTryingToEscape = false;
+                this.escapeTicks = 0;
+                this.triedEscaping = true; // Запрещаем повторный запуск побега до конца боя (по желанию)
+            }
         }
         if(this.hasShield == true){
-            source.getAttacker().damage(this.getWorld().getDamageSources().magic(), amount / 3);
-            amount = amount / 5;
+            if(source.getAttacker() != null) {
+                source.getAttacker().damage(this.getWorld().getDamageSources().magic(), amount / 3);
+                amount = amount / 5;
+            }
         }
         return super.damage(source, amount);
     }
@@ -474,6 +538,7 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
                     PacketByteBuf buf = PacketByteBufs.create();
                     buf.writeBoolean(false); // Выключаем бой
                     ServerPlayNetworking.send(serverPlayer, RonovaEntity.BOSS_STATE_PACKET_ID, buf);
+                    this.bossBar.removePlayer((ServerPlayerEntity) player);
                 }
             }
         }

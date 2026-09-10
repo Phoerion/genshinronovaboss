@@ -10,6 +10,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import phoerion.genshinronovaboss.entity.ModEntities;
@@ -120,6 +121,7 @@ public class RonovaProjectileEntity extends PersistentProjectileEntity implement
     public void tick() {
         // При спавне или в конструкторе/первом тике снаряда задаем скорость вперед по текущему повороту:
         super.tick();
+        explodeOnHit();
         this.setNoGravity(true);
 
         if(!this.getWorld().isClient){
@@ -143,6 +145,30 @@ public class RonovaProjectileEntity extends PersistentProjectileEntity implement
 
     }
 
+    private void explodeOnHit() {
+        if (!this.getWorld().isClient()) {
+            // Проверяем область вокруг снаряда (например, радиус 1 блок)
+            Box checkArea = this.getBoundingBox().expand(0.5D);
+
+            // Ищем чужие стрелы или снаряды
+            java.util.List<PersistentProjectileEntity> incomingProjectiles =
+                    this.getWorld().getEntitiesByClass(
+                            PersistentProjectileEntity.class,
+                            checkArea,
+                            projectile -> projectile != this && projectile.isAlive()
+                    );
+
+            for (PersistentProjectileEntity projectile : incomingProjectiles) {
+                // Вызываем вашу логику взрыва/столкновения
+                this.explode();
+
+                // Уничтожаем чужую стрелу
+                projectile.discard();
+                break;
+            }
+        }
+    }
+
     @Override
     public boolean isInsideWaterOrBubbleColumn() {
         return false;
@@ -158,5 +184,8 @@ public class RonovaProjectileEntity extends PersistentProjectileEntity implement
         return 1.0f;
     }
 
-
+    @Override
+    protected void onHit(LivingEntity target) {
+        this.explode();
+    }
 }

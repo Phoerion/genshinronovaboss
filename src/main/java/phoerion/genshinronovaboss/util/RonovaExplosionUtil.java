@@ -19,8 +19,8 @@ public class RonovaExplosionUtil {
 
     public static void createShieldBreakingExplosion(ServerWorld world, Entity sourceEntity, Vec3d pos) {
         float power = 0.0f;
-        float damage = 20.0f;
-        float box = 6.0f;
+        float damage = 30.0f;
+        float box = 5.0f;
         int radius = (int) Math.ceil(power);
 
         // 1. Исправленный цикл по всем блокам в радиусе взрыва
@@ -68,17 +68,20 @@ public class RonovaExplosionUtil {
         for (LivingEntity entity : world.getEntitiesByClass(LivingEntity.class, damageBox, e -> e != sourceEntity && e.isAlive())) {
             double distanceSq = entity.squaredDistanceTo(pos);
             if (distanceSq <= box * box) {
+                double knockBack = 1.8;
 
                 // Проверка на игрока с поднятым щитом — пробитие и отключение щита
                 if (entity instanceof PlayerEntity player && player.isUsingItem() && player.getActiveItem().isOf(Items.SHIELD)) {
                     player.disableShield(true); // Принудительно ломает анимацию блока и отключает щит на 5 секунд
+                    knockBack = 0.0;
+                    damage = damage / 2;
                 }
 
                 // Нанесение урона
                 entity.damage(world.getDamageSources().explosion(null, sourceEntity), damage);
 
                 Random random = world.getRandom();
-                if(random.nextFloat() <= 0.2f){
+                if(random.nextFloat() <= 0.3f){
                     entity.addStatusEffect(new StatusEffectInstance(ModEffects.RONOVA_CURSE, 200, 0, false, true));
                 }
 
@@ -90,9 +93,9 @@ public class RonovaExplosionUtil {
 
                 if (distance > 0.0) {
                     entity.addVelocity(
-                            (dX / distance) * 1.8,
-                            0.8,
-                            (dZ / distance) * 1.8
+                            (dX / distance) * knockBack,
+                            1.0,
+                            (dZ / distance) * knockBack
                     );
                     entity.velocityModified = true;
                 }

@@ -76,11 +76,12 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
     );
     private boolean hasShield;
 
-    public RonovaEntity(EntityType<? extends PathAwareEntity> entityType, World world) {
+    public RonovaEntity(EntityType<? extends RonovaEntity> entityType, World world) {
         super(entityType, world);
 
         this.moveControl = new FlightMoveControl(this, 30, true);
         this.setNoGravity(true);
+        this.setPersistent();
     }
 
     protected EntityNavigation createNavigation(World world) {
@@ -131,8 +132,17 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
 
     @Override
     public void tick() {
+        if (!this.getWorld().isClient() && this.age % 20 == 0) {
+            System.out.println("[RONOVA] alive at " + this.getBlockPos());
+        }
         super.tick();
         this.setNoGravity(true);
+        if (!this.getWorld().isClient()) {
+            if (!this.isAlive()) {
+                this.bossBar.clearPlayers();
+                return;
+            }
+        }
         breakBlocksAround();
         for (PlayerEntity player : this.getWorld().getEntitiesByClass(PlayerEntity.class, this.getBoundingBox().expand(128), e -> e.isAlive())) {
             disableElytra(player);
@@ -564,7 +574,16 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
 
                 // Снимаем сам эффект статуса
                 player.removeStatusEffect(phoerion.genshinronovaboss.effects.ModEffects.RONOVA_CURSE);
+                this.bossBar.removePlayer((ServerPlayerEntity) player);
             }
+        }
+    }
+
+    @Override
+    public void onRemoved() {
+        super.onRemoved();
+        if (!this.getWorld().isClient()) {
+            this.bossBar.clearPlayers(); // Убирает бар у всех игроков при любом удалении босса
         }
     }
 }

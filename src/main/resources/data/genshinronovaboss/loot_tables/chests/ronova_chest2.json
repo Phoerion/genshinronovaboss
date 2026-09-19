@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 10,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "genshinronovaboss:stellar_vision",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:gold_ingot",
+          "weight": 100
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 100
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:diamond",
+          "weight": 300
+        }
+      ]
+    }
+  ]
+}

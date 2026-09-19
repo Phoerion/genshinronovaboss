@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "genshinronovaboss:celestia",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 123456789,
+    "spacing": 80,
+    "separation": 80
+  }
+}

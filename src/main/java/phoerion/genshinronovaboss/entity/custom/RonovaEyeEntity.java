@@ -156,25 +156,19 @@ public class RonovaEyeEntity extends PathAwareEntity implements GeoEntity {
     }
 
     private void updateFlightHeight(){
-        if (!this.getWorld().isClient()) {
-            BlockPos currentPos = this.getBlockPos();
-            BlockPos.Mutable mutablePos = currentPos.mutableCopy();
+        if (!this.getWorld().isClient() && this.getRonovaBoss() != null) {
 
-            // Ищем ближайший твердый блок под мобом
-            int groundY = currentPos.getY();
-            while (groundY > this.getWorld().getBottomY() && this.getWorld().getBlockState(mutablePos.set(currentPos.getX(), groundY, currentPos.getZ())).isAir()) {
-                groundY--;
-            }
+            int ronovaY = (int) this.getRonovaBoss().getY();
 
-            double targetY = groundY + 1.0 + 1.0; // Высота земли + 2 блока воздуха + смещение до центра моба
+            double targetY = ronovaY;
             double currentY = this.getY();
 
-            // Если босс отклонился по высоте, плавно корректируем его положение
             if (Math.abs(currentY - targetY) > 0.1) {
                 this.setVelocity(this.getVelocity().x, (targetY - currentY) * 0.1, this.getVelocity().z);
             }
         }
     }
+
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {

@@ -282,7 +282,7 @@ public class RonovaAttackGoal extends Goal {
             projectile.setPosition(this.mob.getX(), this.mob.getEyeY() - 0.2, this.mob.getZ());
 
             double dX = target.getX() - this.mob.getX();
-            double dY = target.getEyeY() - projectile.getY();
+            double dY = target.getEyeY() - projectile.getY() -1.0;
             double dZ = target.getZ() - this.mob.getZ();
 
             projectile.setVelocity(dX, dY, dZ, 2.0F, 0.1f);

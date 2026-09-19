@@ -5,7 +5,8 @@
 	"mixins": [
 		"HungerManagerMixin",
 		"LivingEntityMixin",
-		"PlayerEntityMixin"
+		"PlayerEntityMixin",
+		"StructureMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

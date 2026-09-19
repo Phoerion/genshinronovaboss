@@ -3,16 +3,16 @@ package phoerion.genshinronovaboss;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.client.rendering.v1.DimensionRenderingRegistry;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 
-import net.minecraft.world.World;
-import org.apache.logging.log4j.core.jmx.Server;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.structure.processor.StructureProcessorType;
+import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import phoerion.genshinronovaboss.client.ClientBossData;
-import phoerion.genshinronovaboss.client.RonovaSkyRenderer;
 import phoerion.genshinronovaboss.effects.ModEffects;
 import phoerion.genshinronovaboss.entity.ModEntities;
 import phoerion.genshinronovaboss.entity.custom.RonovaEntity;
@@ -21,6 +21,9 @@ import phoerion.genshinronovaboss.item.ModItemGroups;
 import phoerion.genshinronovaboss.item.ModItems;
 import phoerion.genshinronovaboss.network.ModNetworking;
 import phoerion.genshinronovaboss.particle.ModParticles;
+import phoerion.genshinronovaboss.worldgen.ModWorldGen;
+import phoerion.genshinronovaboss.worldgen.structures.CelestiaCommand;
+
 
 public class GenshinRonovaBoss implements ModInitializer {
 	public static final String MOD_ID = "genshinronovaboss";
@@ -32,9 +35,9 @@ public class GenshinRonovaBoss implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		// This code runs as soon as Minecraft is in a mod-load-ready state.
-		// However, some things (like resources) may still be uninitialized.
-		// Proceed with mild caution.
+
+
+		ModWorldGen.register();
 
 		ModItems.registerItems();
 		ModItemGroups.registerItemGroups();
@@ -45,6 +48,12 @@ public class GenshinRonovaBoss implements ModInitializer {
 		ModParticles.registerParticles();
 
 		ModEffects.registerModEffects();
+
+		CommandRegistrationCallback.EVENT.register(
+				(dispatcher, registryAccess, environment) -> {
+					CelestiaCommand.register(dispatcher);
+				}
+		);
 
 		//DimensionRenderingRegistry.registerSkyRenderer(World.OVERWORLD, new RonovaSkyRenderer());
 

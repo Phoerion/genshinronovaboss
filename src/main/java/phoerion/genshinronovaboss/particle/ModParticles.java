@@ -15,6 +15,8 @@ public class ModParticles {
     public static final DefaultParticleType RONOVA_EYE_PARTICLE = FabricParticleTypes.simple();
     public static final DefaultParticleType SCARY_RONOVA_EYE_PARTICLE = FabricParticleTypes.simple();
     public static final DefaultParticleType PUSH_PARTICLE = FabricParticleTypes.simple();
+    public static final DefaultParticleType PLAYER_CHARGE_PARTICLE = FabricParticleTypes.simple();
+    public static final DefaultParticleType CURSE_PARTICLE = FabricParticleTypes.simple();
 
     public static void registerParticles(){
         Registry.register(Registries.PARTICLE_TYPE, new Identifier(GenshinRonovaBoss.MOD_ID, "ronova_explosion_particle"), RONOVA_PARTICLE);
@@ -23,5 +25,7 @@ public class ModParticles {
         Registry.register(Registries.PARTICLE_TYPE, new Identifier(GenshinRonovaBoss.MOD_ID, "ronova_eye_particle"), RONOVA_EYE_PARTICLE);
         Registry.register(Registries.PARTICLE_TYPE, new Identifier(GenshinRonovaBoss.MOD_ID, "scary_ronova_eye_particle"), SCARY_RONOVA_EYE_PARTICLE);
         Registry.register(Registries.PARTICLE_TYPE, new Identifier(GenshinRonovaBoss.MOD_ID, "push_particle"), PUSH_PARTICLE);
+        Registry.register(Registries.PARTICLE_TYPE, new Identifier(GenshinRonovaBoss.MOD_ID, "player_charge_particle"), PLAYER_CHARGE_PARTICLE);
+        Registry.register(Registries.PARTICLE_TYPE, new Identifier(GenshinRonovaBoss.MOD_ID, "curse_particle"), CURSE_PARTICLE);
     }
 }

@@ -119,18 +119,20 @@ public class RonovaProjectileEntity extends PersistentProjectileEntity implement
 
     @Override
     public void tick() {
-        // При спавне или в конструкторе/первом тике снаряда задаем скорость вперед по текущему повороту:
+        Vec3d currentVelocity = this.getVelocity();
+
         super.tick();
+
+        if (this.isAlive()) {
+            this.setVelocity(currentVelocity);
+        }
+
         explodeOnHit();
         this.setNoGravity(true);
 
-        if(!this.getWorld().isClient){
-            net.minecraft.server.world.ServerWorld serverWorld = (net.minecraft.server.world.ServerWorld) this.getWorld();
-        }
-
         if (this.getWorld() instanceof ServerWorld serverWorld) {
             serverWorld.spawnParticles(
-                    phoerion.genshinronovaboss.particle.ModParticles.RONOVA_TRAIL_PARTICLE,
+                    ModParticles.RONOVA_TRAIL_PARTICLE,
                     this.getX(), this.getY(), this.getZ(),
                     1,
                     0.05, 0.05, 0.05,
@@ -139,10 +141,9 @@ public class RonovaProjectileEntity extends PersistentProjectileEntity implement
         }
 
         age++;
-        if(age >= 200){
-            this.discard();
+        if (age >= 200) {
+            this.explode();
         }
-
     }
 
     private void explodeOnHit() {
@@ -188,4 +189,6 @@ public class RonovaProjectileEntity extends PersistentProjectileEntity implement
     protected void onHit(LivingEntity target) {
         this.explode();
     }
+
+
 }

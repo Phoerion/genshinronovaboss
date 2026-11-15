@@ -13,6 +13,7 @@ public class ModItemGroups {
     public static final ItemGroup RONOVA_BOSS_ITEM_GROUP = Registry.register(Registries.ITEM_GROUP, new Identifier(GenshinRonovaBoss.MOD_ID, "grb_item_group"), new FabricItemGroupBuilderImpl().displayName(Text.translatable("itemgroup.grb")).icon(() -> new ItemStack(ModItems.STELLAR_VISION)).entries((displayContext, entries) -> {
         //entries.add(ModItems.STELLAR_VISION);
         entries.add(ModItems.RONOVA_SPAWN_EGG);
+        entries.add(ModItems.RONOVA_HEART);
     }).build());
 
     public static void registerItemGroups(){

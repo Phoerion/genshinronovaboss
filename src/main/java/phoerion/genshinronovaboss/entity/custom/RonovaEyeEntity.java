@@ -102,7 +102,7 @@ public class RonovaEyeEntity extends PathAwareEntity implements GeoEntity {
             LivingEntity ronova = getRonovaBoss();
 
             if (ronova != null && ronova.isAlive()) {
-                ronova.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 40, 4, true, false));
+                ronova.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 40, 3, true, false));
             } else if (this.age > 100) {
                 // Удаляем только если прошло больше 5 секунд, а босс так и не нашелся
                 this.discard();

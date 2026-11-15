@@ -4,14 +4,16 @@ import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.structure.processor.StructureProcessorType;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.network.ServerPlayerEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import phoerion.genshinronovaboss.ability.ronova.CurseOnDamageAbilityManager;
+import phoerion.genshinronovaboss.ability.ronova.ExplodingAbilityManager;
+import phoerion.genshinronovaboss.ability.ronova.SlashAbilityManager;
+import phoerion.genshinronovaboss.ability.ronova.SlashProjectileAbility;
 import phoerion.genshinronovaboss.client.ClientBossData;
 import phoerion.genshinronovaboss.effects.ModEffects;
 import phoerion.genshinronovaboss.entity.ModEntities;
@@ -20,7 +22,9 @@ import phoerion.genshinronovaboss.entity.custom.RonovaEyeEntity;
 import phoerion.genshinronovaboss.item.ModItemGroups;
 import phoerion.genshinronovaboss.item.ModItems;
 import phoerion.genshinronovaboss.network.ModNetworking;
+import phoerion.genshinronovaboss.network.RonovaTagSync;
 import phoerion.genshinronovaboss.particle.ModParticles;
+import phoerion.genshinronovaboss.screen.abilities.ronova.RonovaAbilityHud;
 import phoerion.genshinronovaboss.worldgen.ModWorldGen;
 import phoerion.genshinronovaboss.worldgen.structures.CelestiaCommand;
 
@@ -41,6 +45,7 @@ public class GenshinRonovaBoss implements ModInitializer {
 
 		ModItems.registerItems();
 		ModItemGroups.registerItemGroups();
+
 		ModNetworking.registerC2SPackets();
 
 		ModEntities.registerEntities();
@@ -48,6 +53,8 @@ public class GenshinRonovaBoss implements ModInitializer {
 		ModParticles.registerParticles();
 
 		ModEffects.registerModEffects();
+
+		RonovaTagSync.register();
 
 		CommandRegistrationCallback.EVENT.register(
 				(dispatcher, registryAccess, environment) -> {
@@ -66,6 +73,18 @@ public class GenshinRonovaBoss implements ModInitializer {
 			client.execute(() -> {
 				ClientBossData.isRonovaFightActive = isActive;
 			});
+		});
+
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+
+			for (ServerPlayerEntity player :
+					server.getPlayerManager().getPlayerList()) {
+
+				ExplodingAbilityManager.tick(player);
+				CurseOnDamageAbilityManager.tick(player);
+				SlashAbilityManager.tick(player);
+				SlashProjectileAbility.tickParalysis(player);
+			}
 		});
 	}
 }

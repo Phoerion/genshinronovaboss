@@ -25,6 +25,7 @@ public class ModModelProvider extends FabricModelProvider {
     public void generateItemModels(ItemModelGenerator itemModelGenerator) {
         itemModelGenerator.register(ModItems.STELLAR_VISION, Models.GENERATED);
         itemModelGenerator.register(ModItems.ICE_SWORD, Models.GENERATED);
+        itemModelGenerator.register(ModItems.RONOVA_HEART, Models.GENERATED);
         itemModelGenerator.register(ModItems.RONOVA_SPAWN_EGG,
                 new Model(Optional.of(new Identifier("item/template_spawn_egg")), Optional.empty()));
     }

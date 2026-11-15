@@ -8,7 +8,9 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
+import net.minecraft.server.world.ServerWorld;
 import org.jetbrains.annotations.Nullable;
+import phoerion.genshinronovaboss.particle.ModParticles;
 
 import java.util.UUID;
 
@@ -26,7 +28,17 @@ public class RonovaCurse extends StatusEffect {
 
     @Override
     public void applyUpdateEffect(LivingEntity entity, int amplifier) {
-        super.applyUpdateEffect(entity, amplifier);
+        if (entity.getWorld() instanceof ServerWorld world) {
+            world.spawnParticles(
+                    ModParticles.CURSE_PARTICLE,
+                    entity.getX(),
+                    entity.getY() + entity.getHeight() / 2,
+                    entity.getZ(),
+                    2,
+                    0.3, 0.3, 0.3,
+                    0.02
+            );
+        }
     }
 
     @Override

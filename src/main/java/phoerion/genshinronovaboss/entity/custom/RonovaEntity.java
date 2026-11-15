@@ -82,6 +82,7 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
         this.moveControl = new FlightMoveControl(this, 30, true);
         this.setNoGravity(true);
         this.setPersistent();
+        this.experiencePoints = 250;
     }
 
     protected EntityNavigation createNavigation(World world) {
@@ -144,24 +145,22 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
             }
         }
         breakBlocksAround();
-        for (PlayerEntity player : this.getWorld().getEntitiesByClass(PlayerEntity.class, this.getBoundingBox().expand(128), e -> e.isAlive())) {
-            disableElytra(player);
-        }
+//        for (PlayerEntity player : this.getWorld().getEntitiesByClass(PlayerEntity.class, this.getBoundingBox().expand(128), e -> e.isAlive())) {
+//            disableElytra(player);
+//        }
         updateBossBar();
-        this.EYES.clear(); // Важно очищать список каждый тик, чтобы старые/мертвые глаза удалялись
+        this.EYES.clear();
         for (RonovaEyeEntity eye : this.getWorld().getEntitiesByClass(RonovaEyeEntity.class, this.getBoundingBox().expand(128), e -> e.isAlive() && e.getRonovaBoss() != null)) {
             if(eye.getRonovaBoss().equals(this)) {
                 this.EYES.add(eye);
                 if(this.getWorld() instanceof ServerWorld serverWorld) {
-                    Vec3d eyePos = eye.getEyePos(); // Центр глаза миньона
+                    Vec3d eyePos = eye.getEyePos();
 
-                    // Вычисляем вектор от босса до глаза
                     Vec3d bossPos = this.getPos();
                     Vec3d direction = eyePos.subtract(bossPos);
                     double distance = direction.length();
                     direction = direction.normalize();
 
-                    // Шаг расстановки партиклов (чем меньше, тем сплошнее будет луч)
                     double step = 1.0;
                     if(this.age % 5 == 0) {
                         for (double d = 0; d < distance; d += step) {
@@ -169,9 +168,8 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
                             double currentY = bossPos.y + direction.y * d;
                             double currentZ = bossPos.z + direction.z * d;
 
-                            // Спавним партикл на каждой точке луча
                             serverWorld.spawnParticles(
-                                    ParticleTypes.END_ROD, // Можно заменить на ваш кастомный партикл
+                                    ParticleTypes.END_ROD,
                                     currentX, currentY, currentZ,
                                     1, // Количество партиклов в точке
                                     0.0, 0.0, 0.0, 0.0f // Разброс
@@ -187,49 +185,49 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
 
         this.hasShield = !EYES.isEmpty();
 
-        if(!this.triedEscaping) {
-            escapeCheck();
-        }
+//        //if(!this.triedEscaping) {
+//            escapeCheck();
+//        }
+//
+//        if(this.escapeTicks > 0 && this.isTryingToEscape){
+//            this.escapeTicks--;
+//        }
+//
+//        if(this.escapeTicks == 80 && this.isTryingToEscape){
+//            if (this.getWorld() instanceof ServerWorld serverWorld) {
+//                Vec3d look = this.getRotationVector();
+//                serverWorld.spawnParticles(
+//                        ModParticles.SCARY_RONOVA_EYE_PARTICLE,
+//                        this.getX() - look.x * 2, this.getY() + 2.0, this.getZ() - look.z * 2,
+//                        1,
+//                        0.05, 0.05, 0.05,
+//                        0.0
+//                );
+//            }
+//        }
 
-        if(this.escapeTicks > 0 && this.isTryingToEscape){
-            this.escapeTicks--;
-        }
+//        if(this.isTryingToEscape && this.escapeTicks == 0){
+//            if (!this.getWorld().isClient()) {
+//                // Находим всех игроков поблизости (например, в радиусе 32 блоков) или тех, кто участвовал в бою
+//                java.util.List<net.minecraft.entity.player.PlayerEntity> players = this.getWorld().getEntitiesByClass(
+//                        net.minecraft.entity.player.PlayerEntity.class,
+//                        this.getBoundingBox().expand(100.0D),
+//                        player -> !player.isSpectator()
+//                );
+//
+//                for (net.minecraft.entity.player.PlayerEntity player : players) {
+//                    player.addCommandTag("ronova_cursed");
+//                }
+//
+//
+//            }
+//
+//            this.discard();
+//        }
 
-        if(this.escapeTicks == 80 && this.isTryingToEscape){
-            if (this.getWorld() instanceof ServerWorld serverWorld) {
-                Vec3d look = this.getRotationVector();
-                serverWorld.spawnParticles(
-                        ModParticles.SCARY_RONOVA_EYE_PARTICLE,
-                        this.getX() - look.x * 2, this.getY() + 2.0, this.getZ() - look.z * 2,
-                        1,
-                        0.05, 0.05, 0.05,
-                        0.0
-                );
-            }
-        }
-
-        if(this.isTryingToEscape && this.escapeTicks == 0){
-            if (!this.getWorld().isClient()) {
-                // Находим всех игроков поблизости (например, в радиусе 32 блоков) или тех, кто участвовал в бою
-                java.util.List<net.minecraft.entity.player.PlayerEntity> players = this.getWorld().getEntitiesByClass(
-                        net.minecraft.entity.player.PlayerEntity.class,
-                        this.getBoundingBox().expand(100.0D),
-                        player -> !player.isSpectator()
-                );
-
-                for (net.minecraft.entity.player.PlayerEntity player : players) {
-                    player.addCommandTag("ronova_cursed");
-                }
-
-
-            }
-
-            this.discard();
-        }
-
-        if (this.isTryingToEscape) {
-            this.getLookControl().lookAt(this.getX() + this.getRotationVector().x, this.getY() + this.getRotationVector().y, this.getZ() + this.getRotationVector().z);
-        }
+//        if (this.isTryingToEscape) {
+//            this.getLookControl().lookAt(this.getX() + this.getRotationVector().x, this.getY() + this.getRotationVector().y, this.getZ() + this.getRotationVector().z);
+//        }
 
         updateFlightHeight();
 
@@ -242,10 +240,8 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
 
     private void updateBossBar() {
         if (!this.getWorld().isClient()) {
-            // Обновляем значение прогресса полоски на основе текущего здоровья босса
             this.bossBar.setPercent(this.getHealth() / this.getMaxHealth());
 
-            // Управляем игроками в радиусе видимости (например, 64 блоков)
             Box trackingBox = this.getBoundingBox().expand(64.0D);
             List<ServerPlayerEntity> nearbyPlayers = this.getWorld().getEntitiesByClass(
                     ServerPlayerEntity.class,
@@ -253,14 +249,12 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
                     LivingEntity::isAlive
             );
 
-            // Добавляем новых игроков в область видимости босс-бара
             for (ServerPlayerEntity player : nearbyPlayers) {
                 if (!this.bossBar.getPlayers().contains(player)) {
                     this.bossBar.addPlayer(player);
                 }
             }
 
-            // Удаляем из бара игроков, которые отошли далеко или умерли
             List<ServerPlayerEntity> barPlayers = new java.util.ArrayList<>(this.bossBar.getPlayers());
             for (ServerPlayerEntity player : barPlayers) {
                 if (!nearbyPlayers.contains(player) || player.isSpectator() || !player.isAlive()) {
@@ -275,13 +269,10 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
             ItemStack elytraStack = player.getEquippedStack(net.minecraft.entity.EquipmentSlot.CHEST);
 
             if (elytraStack.getItem() instanceof net.minecraft.item.ElytraItem) {
-                // Очищаем слот
                 player.equipStack(net.minecraft.entity.EquipmentSlot.CHEST, ItemStack.EMPTY);
 
-                // Пытаемся положить в инвентарь игрока
                 boolean added = player.getInventory().insertStack(elytraStack);
 
-                // Если инвентарь полон, дропаем предмет на землю возле игрока
                 if (!added) {
                     player.dropItem(elytraStack, false);
                 }
@@ -292,7 +283,7 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
     private void breakBlocksAround() {
         if (this.getWorld().isClient()) return;
 
-        Box box = this.getBoundingBox().expand(0.5f);
+        Box box = this.getBoundingBox();
         ServerWorld serverWorld = (ServerWorld) this.getWorld();
 
         for (int x = (int) Math.floor(box.minX); x <= (int) Math.floor(box.maxX); x++) {
@@ -302,11 +293,8 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
                     BlockState state = serverWorld.getBlockState(pos);
 
                     if (!state.isAir() && !state.isOf(net.minecraft.block.Blocks.BEDROCK)) {
-                        // 1. Полностью сносим блок на сервере
                         serverWorld.setBlockState(pos, net.minecraft.block.Blocks.AIR.getDefaultState(), 3);
 
-                        // 2. Принудительно отправляем пакет всем игрокам поблизости,
-                        // чтобы клиент гарантированно стер коллизию и обновил рендер
                         serverWorld.getChunkManager().markForUpdate(pos);
                     }
                 }
@@ -315,12 +303,12 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
     }
 
     private void tryCreatingShield() {
-        if (this.getWorld().isClient() && this.age % 2 == 0) { // Каждые 2 тика для оптимизации
-            double radius = 1.5; // Радиус щита
-            int particlesCount = 30; // Количество точек на сфере за один спавн
+        if (this.getWorld().isClient() && this.age % 2 == 0) {
+            double radius = 1.5;
+            int particlesCount = 30;
 
             for (int i = 0; i < particlesCount; i++) {
-                // Углы для равномерного распределения по сфере (Fibonacci sphere или случайные)
+
                 double theta = this.getWorld().random.nextDouble() * Math.PI * 2;
                 double phi = Math.acos(this.getWorld().random.nextDouble() * 2 - 1);
 
@@ -328,7 +316,6 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
                 double y = this.getY() + this.getHeight() / 2.0 + radius * Math.sin(phi) * Math.sin(theta);
                 double z = this.getZ() + radius * Math.cos(phi);
 
-                // Спавним партикл (например, портала, магии или кастомный)
                 this.getWorld().addParticle(ParticleTypes.DRAGON_BREATH, x, y, z, 0.0, 0.0, 0.0);
             }
         }
@@ -339,16 +326,14 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
             BlockPos currentPos = this.getBlockPos();
             BlockPos.Mutable mutablePos = currentPos.mutableCopy();
 
-            // Ищем ближайший твердый блок под мобом
             int groundY = currentPos.getY();
             while (groundY > this.getWorld().getBottomY() && this.getWorld().getBlockState(mutablePos.set(currentPos.getX(), groundY, currentPos.getZ())).isAir()) {
                 groundY--;
             }
 
-            double targetY = groundY + 2.0 + 1.0; // Высота земли + 2 блока воздуха + смещение до центра моба
+            double targetY = groundY + 2.0 + 1.0;
             double currentY = this.getY();
 
-            // Если босс отклонился по высоте, плавно корректируем его положение
             if (Math.abs(currentY - targetY) > 0.1) {
                 this.setVelocity(this.getVelocity().x, (targetY - currentY) * 0.1, this.getVelocity().z);
             }
@@ -357,7 +342,6 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
 
     private void updateIsRonovaFightActive(){
         if (!this.getWorld().isClient()) {
-            // Задаем область поиска 64 блока вокруг босса
             Box searchBox = this.getBoundingBox().expand(100.0D);
             List<ServerPlayerEntity> nearbyPlayers = this.getWorld().getEntitiesByClass(
                     ServerPlayerEntity.class,
@@ -365,7 +349,6 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
                     LivingEntity::isAlive
             );
 
-            // Проходим по всем игрокам в радиусе
             for (ServerPlayerEntity player : nearbyPlayers) {
                 ClientBossData.isRonovaFightActive = true;
             }
@@ -378,10 +361,8 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
 
     private void defendFromProjectiles(){
         if (!this.getWorld().isClient()) {
-            // Проверяем снаряды в радиусе защиты вокруг босса
             Box checkbox = this.getBoundingBox().expand(1.5D);
 
-            // Сканируем только стрелы (ArrowEntity / PersistentProjectileEntity) и трезубцы (TridentEntity)
             List<net.minecraft.entity.projectile.PersistentProjectileEntity> projectiles =
                     this.getWorld().getEntitiesByClass(
                             net.minecraft.entity.projectile.PersistentProjectileEntity.class,
@@ -392,14 +373,11 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
                     );
 
             for (net.minecraft.entity.projectile.PersistentProjectileEntity projectile : projectiles) {
-                // Инвертируем вектор движения, заставляя снаряд отскочить назад
+
                 Vec3d vel = projectile.getVelocity();
                 projectile.setVelocity(-vel.x, -vel.y, -vel.z);
 
                 projectile.velocityModified = true;
-
-                // Опционально: можно сделать так, чтобы отлетевший трезубец или стрела наносили урон тому, кто их кинул
-                // projectile.setOwner(this);
             }
         }
     }
@@ -409,18 +387,13 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
             ServerWorld serverWorld = (ServerWorld) this.getWorld();
             ChunkPos currentChunkPos = new ChunkPos(this.getBlockPos());
 
-            // Если босс сменил чанк — убираем старый форс-лоуд
             if (lastChunkPos != null && !currentChunkPos.equals(lastChunkPos)) {
                 serverWorld.setChunkForced(lastChunkPos.x, lastChunkPos.z, false);
             }
 
-            // Каждые 20 тиков (раз в секунду) или принудительно обновляем статус
-            // текущего чанка, чтобы он никогда не выгрузился под боссом
             serverWorld.setChunkForced(currentChunkPos.x, currentChunkPos.z, true);
 
             lastChunkPos = currentChunkPos;
-
-            // ... здесь дальше идет ваша логика поиска игроков и пакетов ...
         }
     }
 
@@ -437,7 +410,6 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
     private void performEscapePush() {
         if (this.getWorld().isClient()) return;
 
-        // Радиус отталкивания (например, 8 блоков вокруг босса)
         Box searchBox = this.getBoundingBox().expand(20.0D);
         List<LivingEntity> entities = this.getWorld().getEntitiesByClass(
                 LivingEntity.class,
@@ -446,10 +418,8 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
         );
 
         for (LivingEntity entity : entities) {
-            // Вычисляем вектор направления от босса к сущности
             Vec3d dir = entity.getPos().subtract(this.getPos()).normalize();
 
-            // Задаем силу отталкивания (по горизонтали умножаем на 1.5, добавляем подброс вверх на 0.4)
             entity.setVelocity(dir.x * 2.0, 1.5, dir.z * 2.0);
             entity.damage(this.getWorld().getDamageSources().magic(), 10.0f);
 
@@ -463,7 +433,6 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
                 );
             }
 
-            // Обязательно помечаем, что скорость изменена, чтобы сервер синхронизировал ее с клиентом
             entity.velocityModified = true;
 
             Random random = this.getWorld().getRandom();
@@ -496,7 +465,7 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
                 state.getController().setAnimation(RawAnimation.begin().thenPlay("escapeAnimation"));
                 return PlayState.CONTINUE;
             }
-            // Базовая анимация по умолчанию
+
             state.getController().setAnimation(RawAnimation.begin().thenLoop("idle"));
             return PlayState.CONTINUE;
         })
@@ -519,7 +488,6 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
 
     @Override
     public boolean damage(net.minecraft.entity.damage.DamageSource source, float amount) {
-        // Если источник урона — удушье внутри стены, полностью отменяем урон
         if (source.isOf(net.minecraft.entity.damage.DamageTypes.IN_WALL) || source.isOf(DamageTypes.EXPLOSION) || source.isOf(DamageTypes.ARROW) || source.isOf(DamageTypes.FREEZE)) {
             return false;
         }
@@ -527,7 +495,7 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
             if (this.isTryingToEscape) {
                 this.isTryingToEscape = false;
                 this.escapeTicks = 0;
-                this.triedEscaping = true; // Запрещаем повторный запуск побега до конца боя (по желанию)
+                this.triedEscaping = true;
             }
         }
         if(this.hasShield == true){
@@ -546,7 +514,7 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
             for (PlayerEntity player : this.getWorld().getPlayers()) {
                 if (player instanceof ServerPlayerEntity serverPlayer) {
                     PacketByteBuf buf = PacketByteBufs.create();
-                    buf.writeBoolean(false); // Выключаем бой
+                    buf.writeBoolean(false);
                     ServerPlayNetworking.send(serverPlayer, RonovaEntity.BOSS_STATE_PACKET_ID, buf);
                     this.bossBar.removePlayer((ServerPlayerEntity) player);
                 }
@@ -561,7 +529,6 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
         super.onDeath(damageSource);
 
         if (!this.getWorld().isClient()) {
-            // Находим всех игроков поблизости (например, в радиусе 32 блоков) или тех, кто участвовал в бою
             java.util.List<net.minecraft.entity.player.PlayerEntity> players = this.getWorld().getEntitiesByClass(
                     net.minecraft.entity.player.PlayerEntity.class,
                     this.getBoundingBox().expand(100.0D),
@@ -569,10 +536,8 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
             );
 
             for (net.minecraft.entity.player.PlayerEntity player : players) {
-                // Удаляем постоянный тег проклятия
                 player.getCommandTags().remove("ronova_cursed");
 
-                // Снимаем сам эффект статуса
                 player.removeStatusEffect(phoerion.genshinronovaboss.effects.ModEffects.RONOVA_CURSE);
                 this.bossBar.removePlayer((ServerPlayerEntity) player);
             }
@@ -583,7 +548,7 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
     public void onRemoved() {
         super.onRemoved();
         if (!this.getWorld().isClient()) {
-            this.bossBar.clearPlayers(); // Убирает бар у всех игроков при любом удалении босса
+            this.bossBar.clearPlayers();
         }
     }
 }

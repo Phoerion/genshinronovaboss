@@ -75,24 +75,24 @@ public class RonovaSlashProjectile extends ProjectileEntity implements GeoEntity
         if (!this.getWorld().isClient()) {
             Box box = this.getBoundingBox();
 
-            // 1. Логика разрушения блоков
-            for (int x = (int) Math.floor(box.minX); x <= (int) Math.floor(box.maxX); x++) {
-                for (int y = (int) Math.floor(box.minY); y <= (int) Math.floor(box.maxY); y++) {
-                    for (int z = (int) Math.floor(box.minZ); z <= (int) Math.floor(box.maxZ); z++) {
-                        BlockPos pos = new BlockPos(x, y, z);
-                        BlockState state = this.getWorld().getBlockState(pos);
-
-                        if (!state.isAir() && !state.isOf(net.minecraft.block.Blocks.BEDROCK)) {
-                            this.getWorld().breakBlock(pos, false, this);
-                        }
-                    }
-                }
-            }
+//            // 1. Логика разрушения блоков
+//            for (int x = (int) Math.floor(box.minX); x <= (int) Math.floor(box.maxX); x++) {
+//                for (int y = (int) Math.floor(box.minY); y <= (int) Math.floor(box.maxY); y++) {
+//                    for (int z = (int) Math.floor(box.minZ); z <= (int) Math.floor(box.maxZ); z++) {
+//                        BlockPos pos = new BlockPos(x, y, z);
+//                        BlockState state = this.getWorld().getBlockState(pos);
+//
+//                        if (!state.isAir() && !state.isOf(net.minecraft.block.Blocks.BEDROCK)) {
+//                            this.getWorld().breakBlock(pos, false, this);
+//                        }
+//                    }
+//                }
+//            }
 
             // 2. Логика нанесения урона сущностям через собственный хитбокс
             for (LivingEntity target : this.getWorld().getNonSpectatingEntities(LivingEntity.class, box)) {
                 if (target != this.getOwner() && !hitEntities.contains(target)) {
-                    hitEntities.add(target); // Запоминаем цель, чтобы ударить ровно 1 раз за полет
+                    hitEntities.add(target);
                     if (target instanceof PlayerEntity player && player.isUsingItem() && player.getActiveItem().isOf(Items.SHIELD)) {
                         target.damage(
                                 this.getWorld().getDamageSources().indirectMagic(this, this.getOwner()),

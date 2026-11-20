@@ -67,7 +67,7 @@ public class ModByteBufs {
                 }
         );
 
-// Curse ability cooldown
+        // Curse ability cooldown
         ClientPlayNetworking.registerGlobalReceiver(
                 ModNetworking.CURSE_COOLDOWN_PACKET_ID,
                 (client, handler, buf, responseSender) -> {
@@ -79,7 +79,7 @@ public class ModByteBufs {
                 }
         );
 
-// Slash ability cooldown
+        // Slash ability cooldown
         ClientPlayNetworking.registerGlobalReceiver(
                 ModNetworking.SLASH_COOLDOWN_PACKET_ID,
                 (client, handler, buf, responseSender) -> {

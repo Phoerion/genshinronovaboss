@@ -5,11 +5,35 @@
   "item.genshinronovaboss.ice_sword": "Ice Sword",
   "item.genshinronovaboss.ronova_spawn_egg": "Ronova Spawn Egg",
   "item.genshinronovaboss.ronova_heart": "Ronova Heart",
+  "item.genshinronovaboss.raw_tin": "Raw Tin",
+  "item.genshinronovaboss.tin_ingot": "Tin Ingot",
+  "item.genshinronovaboss.bronze_ingot": "Bronze Ingot",
+  "item.genshinronovaboss.bronze_nugget": "Bronze Nugget",
+  "item.genshinronovaboss.tin_nugget": "Tin Nugget",
+  "item.genshinronovaboss.death_ingot": "Death Ingot",
+  "item.genshinronovaboss.ruler_of_death_helmet": "Ruler Of Death Helmet",
+  "item.genshinronovaboss.ruler_of_death_chestplate": "Ruler Of Death Chestplate",
+  "item.genshinronovaboss.ruler_of_death_leggings": "Ruler Of Death Leggings",
+  "item.genshinronovaboss.ruler_of_death_boots": "Ruler Of Death Boots",
+  "item.genshinronovaboss.ruler_of_death_sword": "Ruler Of Death Sword",
+  "item.genshinronovaboss.job_application": "Job Application",
+
+  "block.genshinronovaboss.deepslate_tin_ore": "Deepslate Tin Ore",
+  "block.genshinronovaboss.tin_ore": "Tin Ore",
+  "block.genshinronovaboss.tin_block": "Tin Block",
+  "block.genshinronovaboss.raw_tin_block": "Raw Tin Block",
+  "block.genshinronovaboss.bronze_block": "Bronze Block",
   "effect.genshinronovaboss.ronova_curse": "Ronova Curse",
+  "effect.genshinronovaboss.ruler_of_death": "Ruler Of Death",
+  "effect.genshinronovaboss.death_shield": "Death Shield",
 
   "key.genshinronovaboss.ability": "First Ability",
   "key.genshinronovaboss.second_ability": "Second Ability",
   "key.genshinronovaboss.third_ability": "Third Ability",
 
-  "entity.genshinronovaboss.ronova": "Ronova"
+  "entity.genshinronovaboss.ronova": "Ronova",
+
+  "item.genshinronovaboss.ruler_of_death_sword.tooltip": "§cHas a 20% chance to curse your enemy",
+  "item.genshinronovaboss.ruler_of_death_sword.tooltip.1": "§5Use to make a reflecting shield for 5 hits",
+  "item.genshinronovaboss.job_application.tooltip": "§lGet a job bro"
 }

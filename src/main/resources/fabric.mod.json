@@ -3,9 +3,9 @@
 	"id": "genshinronovaboss",
 	"version": "${version}",
 	"name": "GenshinRonovaBoss",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Fight a new boss, make equipment and visit new dimensions",
 	"authors": [
-		"Me!"
+		"Phoerion, some textures made by HennePenne12"
 	],
 	"contact": {
 		"homepage": "https://fabricmc.net/",

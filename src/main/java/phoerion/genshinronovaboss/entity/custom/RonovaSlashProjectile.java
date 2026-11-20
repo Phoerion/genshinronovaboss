@@ -34,7 +34,7 @@ public class RonovaSlashProjectile extends ProjectileEntity implements GeoEntity
 
     public RonovaSlashProjectile(EntityType<? extends ProjectileEntity> entityType, World world) {
         super(entityType, world);
-        this.noClip = true; // Полностью отключаем физику столкновений
+        this.noClip = true;
     }
 
     public RonovaSlashProjectile(World world, LivingEntity owner) {
@@ -75,7 +75,6 @@ public class RonovaSlashProjectile extends ProjectileEntity implements GeoEntity
         if (!this.getWorld().isClient()) {
             Box box = this.getBoundingBox();
 
-//            // 1. Логика разрушения блоков
 //            for (int x = (int) Math.floor(box.minX); x <= (int) Math.floor(box.maxX); x++) {
 //                for (int y = (int) Math.floor(box.minY); y <= (int) Math.floor(box.maxY); y++) {
 //                    for (int z = (int) Math.floor(box.minZ); z <= (int) Math.floor(box.maxZ); z++) {
@@ -89,7 +88,6 @@ public class RonovaSlashProjectile extends ProjectileEntity implements GeoEntity
 //                }
 //            }
 
-            // 2. Логика нанесения урона сущностям через собственный хитбокс
             for (LivingEntity target : this.getWorld().getNonSpectatingEntities(LivingEntity.class, box)) {
                 if (target != this.getOwner() && !hitEntities.contains(target)) {
                     hitEntities.add(target);
@@ -138,7 +136,7 @@ public class RonovaSlashProjectile extends ProjectileEntity implements GeoEntity
 
     @Override
     protected void onEntityHit(EntityHitResult entityHitResult) {
-        // Больше не используем, логика перенесена в tick() для стабильности
+
     }
 
     @Override
@@ -156,7 +154,6 @@ public class RonovaSlashProjectile extends ProjectileEntity implements GeoEntity
 
     @Override
     public void setVelocity(double x, double y, double z, float speed, float divergence) {
-        // Жестко задаем чистый вектор скорости без рандома и ванильных поправок на гравитацию/сопротивление
         super.setVelocity(x, y, z, speed, 0.0f);
         this.velocityModified = true;
     }

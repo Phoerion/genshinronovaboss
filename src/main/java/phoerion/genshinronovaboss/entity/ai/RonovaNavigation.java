@@ -26,7 +26,6 @@ public class RonovaNavigation extends BirdNavigation {
         boolean air2 = world.getBlockState(twoBelow).isAir();
         boolean air3 = world.getBlockState(threeBelow).isAir();
 
-        // Если под мобом 3 блока воздуха → он слишком высоко
         return air1 && air2 && air3;
     }
 }

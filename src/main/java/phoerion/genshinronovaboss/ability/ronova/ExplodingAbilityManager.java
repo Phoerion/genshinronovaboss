@@ -30,7 +30,6 @@ public class ExplodingAbilityManager {
         return (int) COOLDOWN_TICKS;
     }
 
-    // Начало зарядки
     public static void startCharging(ServerPlayerEntity player) {
 
         UUID uuid = player.getUuid();
@@ -52,7 +51,6 @@ public class ExplodingAbilityManager {
         EXPLODING_PROJECTILE.startCharging(player);
     }
 
-    // Вызывается каждый серверный тик
     public static void tick(ServerPlayerEntity player) {
 
         UUID uuid = player.getUuid();
@@ -86,7 +84,6 @@ public class ExplodingAbilityManager {
         EXPLODING_PROJECTILE.chargingTick(player, chargeTime);
     }
 
-    // Завершение зарядки
     public static void release(ServerPlayerEntity player) {
 
         UUID uuid = player.getUuid();
@@ -97,20 +94,16 @@ public class ExplodingAbilityManager {
 
         int chargeTime = CHARGING.remove(uuid);
 
-        // Проверяем тег ещё раз
         if (!player.getCommandTags().contains("ronova")) {
             return;
         }
 
-        // Слишком короткая зарядка не запускает снаряд
         if (chargeTime < 5) {
             return;
         }
 
-        // Активируем способность
         EXPLODING_PROJECTILE.release(player, chargeTime);
 
-        // Запускаем кулдаун
         COOLDOWNS.put(uuid, COOLDOWN_TICKS);
     }
 

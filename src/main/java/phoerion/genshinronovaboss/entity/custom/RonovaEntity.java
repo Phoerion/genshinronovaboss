@@ -133,9 +133,7 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
 
     @Override
     public void tick() {
-        if (!this.getWorld().isClient() && this.age % 20 == 0) {
-            System.out.println("[RONOVA] alive at " + this.getBlockPos());
-        }
+
         super.tick();
         this.setNoGravity(true);
         if (!this.getWorld().isClient()) {
@@ -145,9 +143,9 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
             }
         }
         breakBlocksAround();
-//        for (PlayerEntity player : this.getWorld().getEntitiesByClass(PlayerEntity.class, this.getBoundingBox().expand(128), e -> e.isAlive())) {
-//            disableElytra(player);
-//        }
+        for (PlayerEntity player : this.getWorld().getEntitiesByClass(PlayerEntity.class, this.getBoundingBox().expand(128), e -> e.isAlive())) {
+            disableElytra(player);
+        }
         updateBossBar();
         this.EYES.clear();
         for (RonovaEyeEntity eye : this.getWorld().getEntitiesByClass(RonovaEyeEntity.class, this.getBoundingBox().expand(128), e -> e.isAlive() && e.getRonovaBoss() != null)) {
@@ -171,8 +169,8 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
                             serverWorld.spawnParticles(
                                     ParticleTypes.END_ROD,
                                     currentX, currentY, currentZ,
-                                    1, // Количество партиклов в точке
-                                    0.0, 0.0, 0.0, 0.0f // Разброс
+                                    1,
+                                    0.0, 0.0, 0.0, 0.0f
                             );
                         }
                     }
@@ -185,6 +183,7 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
 
         this.hasShield = !EYES.isEmpty();
 
+//        ESCAPE ABILITY (not used because it was unfair to the player)
 //        //if(!this.triedEscaping) {
 //            escapeCheck();
 //        }
@@ -208,7 +207,6 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
 
 //        if(this.isTryingToEscape && this.escapeTicks == 0){
 //            if (!this.getWorld().isClient()) {
-//                // Находим всех игроков поблизости (например, в радиусе 32 блоков) или тех, кто участвовал в бою
 //                java.util.List<net.minecraft.entity.player.PlayerEntity> players = this.getWorld().getEntitiesByClass(
 //                        net.minecraft.entity.player.PlayerEntity.class,
 //                        this.getBoundingBox().expand(100.0D),
@@ -233,7 +231,7 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
 
         updateIsRonovaFightActive();
 
-        defendFromProjectiles();
+//        defendFromProjectiles();
 
         updateChunks();
     }
@@ -443,19 +441,19 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
     }
 
     public void triggerAttackAnimation() {
-        this.triggerAnim("controller", "attack");// Длительность в тиках (зависит от длины анимации)
+        this.triggerAnim("controller", "attack");
     }
 
     public void triggerTPAttackAnimation() {
-        this.triggerAnim("controller", "tpAttack");// Длительность в тиках (зависит от длины анимации)
+        this.triggerAnim("controller", "tpAttack");
     }
 
     public void triggerSlashAttackAnimation() {
-        this.triggerAnim("controller", "slashAttack");// Длительность в тиках (зависит от длины анимации)
+        this.triggerAnim("controller", "slashAttack");
     }
 
     public void triggerSummonAttackAnimation() {
-        this.triggerAnim("controller", "summon");// Длительность в тиках (зависит от длины анимации)
+        this.triggerAnim("controller", "summon");
     }
 
     @Override
@@ -488,7 +486,7 @@ public class RonovaEntity extends PathAwareEntity implements GeoEntity {
 
     @Override
     public boolean damage(net.minecraft.entity.damage.DamageSource source, float amount) {
-        if (source.isOf(net.minecraft.entity.damage.DamageTypes.IN_WALL) || source.isOf(DamageTypes.EXPLOSION) || source.isOf(DamageTypes.ARROW) || source.isOf(DamageTypes.FREEZE)) {
+        if (source.isOf(net.minecraft.entity.damage.DamageTypes.IN_WALL) || source.isOf(DamageTypes.ARROW) || source.isOf(DamageTypes.FREEZE) || source.isOf(DamageTypes.LAVA)) {
             return false;
         }
         if(source.getAttacker() != null) {

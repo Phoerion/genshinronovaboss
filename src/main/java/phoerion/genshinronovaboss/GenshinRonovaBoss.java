@@ -14,6 +14,7 @@ import phoerion.genshinronovaboss.ability.ronova.CurseOnDamageAbilityManager;
 import phoerion.genshinronovaboss.ability.ronova.ExplodingAbilityManager;
 import phoerion.genshinronovaboss.ability.ronova.SlashAbilityManager;
 import phoerion.genshinronovaboss.ability.ronova.SlashProjectileAbility;
+import phoerion.genshinronovaboss.block.ModBlocks;
 import phoerion.genshinronovaboss.client.ClientBossData;
 import phoerion.genshinronovaboss.effects.ModEffects;
 import phoerion.genshinronovaboss.entity.ModEntities;
@@ -25,7 +26,9 @@ import phoerion.genshinronovaboss.network.ModNetworking;
 import phoerion.genshinronovaboss.network.RonovaTagSync;
 import phoerion.genshinronovaboss.particle.ModParticles;
 import phoerion.genshinronovaboss.screen.abilities.ronova.RonovaAbilityHud;
+import phoerion.genshinronovaboss.worldgen.ModConfiguredFeatures;
 import phoerion.genshinronovaboss.worldgen.ModWorldGen;
+import phoerion.genshinronovaboss.worldgen.gen.ModOreGeneration;
 import phoerion.genshinronovaboss.worldgen.structures.CelestiaCommand;
 
 
@@ -42,9 +45,12 @@ public class GenshinRonovaBoss implements ModInitializer {
 
 
 		ModWorldGen.register();
+		ModOreGeneration.generateOres();
 
 		ModItems.registerItems();
 		ModItemGroups.registerItemGroups();
+
+		ModBlocks.registerModBlocks();
 
 		ModNetworking.registerC2SPackets();
 

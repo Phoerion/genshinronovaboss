@@ -1,1 +1,3 @@
-// 1.20.1	2026-09-23T20:37:42.2703699	GenshinRonovaBoss/World Gen
+// 1.20.1	2026-11-20T21:50:09.0783425	GenshinRonovaBoss/World Gen
+b7fd1ea847089f6b472f89a3b6025bda7b5f606d data\genshinronovaboss\worldgen\configured_feature\tin_ore.json
+dace03a837a451577c19ad501d93392413167e42 data\genshinronovaboss\worldgen\placed_feature\tin_ore_placed.json

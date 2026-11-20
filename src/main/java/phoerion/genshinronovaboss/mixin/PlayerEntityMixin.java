@@ -1,6 +1,7 @@
 package phoerion.genshinronovaboss.mixin;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
@@ -13,12 +14,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import phoerion.genshinronovaboss.ability.ronova.SlashProjectileAbility;
+import phoerion.genshinronovaboss.effects.ModEffects;
 
 @Mixin(PlayerEntity.class)
 public class PlayerEntityMixin {
 
-    // Сохраняем состояние проклятия в NBT игрока (чтобы оно оставалось после смерти и перезахода)
     @Inject(method = "writeCustomDataToNbt", at = @At("HEAD"))
     private void saveRonovaCurse(NbtCompound nbt, CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;
@@ -38,9 +40,7 @@ public class PlayerEntityMixin {
     private void onPlayerTick(CallbackInfo ci) {
         PlayerEntity player = (PlayerEntity) (Object) this;
 
-        // Если у игрока есть постоянный тег проклятия
         if (player.getCommandTags().contains("ronova_cursed") && !player.getCommandTags().contains("ronova")) {
-            // Если эффект пропал (например, от молока), принудительно возвращаем его
             if (player.age % 10 == 0) {
                 player.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(
                         phoerion.genshinronovaboss.effects.ModEffects.RONOVA_CURSE,
@@ -52,13 +52,13 @@ public class PlayerEntityMixin {
             }
         }
 
-        if (player.getCommandTags().contains("ronova") && !player.getWorld().isClient) {
-
-            if (player.age % 10 == 0) {
-                player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 200, 1, false, false, false));
-                player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 200, 0, false, false, false));
-            }
-        }
+//        if (player.getCommandTags().contains("ronova") && !player.getWorld().isClient) {
+//
+//            if (player.age % 10 == 0) {
+//                player.addStatusEffect(new StatusEffectInstance(StatusEffects.RESISTANCE, 200, 1, false, false, false));
+//                player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 200, 0, false, false, false));
+//            }
+//        }
     }
 
     @Inject(method = "onDeath", at = @At("HEAD"))
@@ -68,7 +68,6 @@ public class PlayerEntityMixin {
         Entity attacker = source.getAttacker();
         Entity directSource = source.getSource();
 
-        // Проверяем, нанес ли удар сам босс, его миньон или их снаряды
         boolean isRonovaRelated =
                 attacker instanceof phoerion.genshinronovaboss.entity.custom.RonovaEntity ||
                         attacker instanceof phoerion.genshinronovaboss.entity.custom.RonovaEyeEntity ||
@@ -88,6 +87,21 @@ public class PlayerEntityMixin {
             player.setVelocity(0, 0, 0);
             player.velocityModified = true;
             ci.cancel();
+        }
+    }
+
+    @Inject(method = "damage", at = @At("RETURN"))
+    private void onDamaged(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+
+        LivingEntity entity = (LivingEntity) (Object) this;
+
+        if (!(entity instanceof PlayerEntity player)) return;
+
+        if (!player.hasStatusEffect(ModEffects.RULER_OF_DEATH)) return;
+
+        if (source.getAttacker() instanceof LivingEntity attacker) {
+            attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, 100, 0));
+            attacker.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 100, 0));
         }
     }
 }

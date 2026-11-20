@@ -29,13 +29,10 @@ public class PushParticle extends SpriteBillboardParticle {
         return ParticleTextureSheet.PARTICLE_SHEET_TRANSLUCENT;
     }
 
-    // --- ФАБРИКА ---
     public static class Factory implements ParticleFactory<DefaultParticleType> {
-        // ПОЛЕ ФАБРИКИ
         private final SpriteProvider spriteProvider;
 
         public Factory(SpriteProvider spriteProvider) {
-            // Инициализация поля класса переданным аргументом
             this.spriteProvider = spriteProvider;
         }
 

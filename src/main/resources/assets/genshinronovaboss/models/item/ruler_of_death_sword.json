@@ -1,0 +1,6 @@
+{
+	"parent": "minecraft:item/generated",
+	"textures": {
+		"layer0": "genshinronovaboss:item/ruler_of_death_sword"
+	}
+}

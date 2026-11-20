@@ -78,8 +78,6 @@ public class ModNetworking {
 
                         if (player.getCommandTags().contains("ronova")) {
 
-                            // Здесь можно подключить другие способности Роновa.
-
                         } else if (player.getInventory().contains(
                                 new ItemStack(ModItems.STELLAR_VISION))) {
 
@@ -92,7 +90,6 @@ public class ModNetworking {
                 }
         );
 
-        // Начало зарядки
         ServerPlayNetworking.registerGlobalReceiver(
                 START_CHARGING_PACKET_ID,
                 (server, player, handler, buf, responseSender) -> {
@@ -103,7 +100,6 @@ public class ModNetworking {
                 }
         );
 
-        // Отпускание клавиши
         ServerPlayNetworking.registerGlobalReceiver(
                 RELEASE_CHARGING_PACKET_ID,
                 (server, player, handler, buf, responseSender) -> {

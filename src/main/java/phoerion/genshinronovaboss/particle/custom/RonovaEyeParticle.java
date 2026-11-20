@@ -8,7 +8,6 @@ public class RonovaEyeParticle extends SpriteBillboardParticle {
     protected RonovaEyeParticle(ClientWorld clientWorld, double d, double e, double f, SpriteProvider spriteProvider) {
         super(clientWorld, d, e, f);
 
-        // Установка спрайта из провайдера (если анимация по возрасту, используйте setSpriteForAge)
         this.setSprite(spriteProvider);
 
         this.scale = 10.0f;
@@ -20,7 +19,6 @@ public class RonovaEyeParticle extends SpriteBillboardParticle {
     public void tick() {
         super.tick();
 
-        // Плавное уменьшение масштаба на последней фазе жизни с использованием float
         if (this.age > 30) {
             float progress = (float) (maxAge - age) / (float) (maxAge - 30);
             this.scale = 4.0f * progress;

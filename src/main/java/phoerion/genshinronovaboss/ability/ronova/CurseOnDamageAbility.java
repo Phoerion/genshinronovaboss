@@ -4,7 +4,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import phoerion.genshinronovaboss.ability.Ability;
 import phoerion.genshinronovaboss.screen.abilities.ronova.RonovaAbilityHud;
 
-public class CurseOnDamageAbility extends Ability { ;
+public class  CurseOnDamageAbility extends Ability { ;
     public CurseOnDamageAbility(String id, int cooldown) {
         super(id, cooldown);
     }

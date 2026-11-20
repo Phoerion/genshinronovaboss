@@ -9,6 +9,7 @@ import net.minecraft.network.PacketByteBuf;
 
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
+import phoerion.genshinronovaboss.GenshinRonovaBoss;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +18,7 @@ import java.util.UUID;
 public class RonovaTagSync {
 
     public static final Identifier CHANNEL =
-            new Identifier("genshinronovaboss", "ronova_state");
+            new Identifier(GenshinRonovaBoss.MOD_ID, "ronova_state");
 
     private static final Map<UUID, Boolean> PLAYER_STATES = new HashMap<>();
 

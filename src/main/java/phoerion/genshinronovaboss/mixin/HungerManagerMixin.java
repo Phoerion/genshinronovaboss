@@ -13,10 +13,7 @@ public class HungerManagerMixin {
 
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
     private void cancelNaturalRegen(PlayerEntity player, CallbackInfo ci) {
-        // Если у игрока есть проклятие Роновы, полностью отключаем логику обновления голода/регенерации
         if (player.hasStatusEffect(ModEffects.RONOVA_CURSE)) {
-            // Опционально: можно дать забирать еду, но запретить лечить.
-            // Если отменяем метод полностью — сытость вообще перестает тратиться на регенерацию.
             ci.cancel();
         }
     }

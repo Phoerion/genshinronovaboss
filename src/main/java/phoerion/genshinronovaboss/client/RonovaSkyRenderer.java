@@ -28,7 +28,6 @@ public class RonovaSkyRenderer implements net.fabricmc.fabric.api.client.renderi
         matrices.multiply(camera.getRotation());
         Matrix4f modelViewMatrix = matrices.peek().getPositionMatrix();
 
-        // Рисуем каждый глаз раздельно (теперь begin и draw находятся внутри drawEye)
         drawEye(modelViewMatrix, 0, 80, -30);
         drawEye(modelViewMatrix, -50, 40, -50);
         drawEye(modelViewMatrix, 50, 40, -50);

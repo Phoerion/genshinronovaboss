@@ -6,12 +6,12 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "genshinronovaboss:stellar_vision",
-          "weight": 10
+          "name": "minecraft:gold_ingot",
+          "weight": 200
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:gold_ingot",
+          "name": "genshinronovaboss:tin_ingot",
           "weight": 200
         },
         {
@@ -23,6 +23,16 @@
           "type": "minecraft:item",
           "name": "minecraft:diamond",
           "weight": 100
+        },
+        {
+          "type": "minecraft:item",
+          "name": "genshinronovaboss:bronze_ingot",
+          "weight": 100
+        },
+        {
+          "type": "minecraft:item",
+          "name": "genshinronovaboss:job_application",
+          "weight": 50
         }
       ]
     }

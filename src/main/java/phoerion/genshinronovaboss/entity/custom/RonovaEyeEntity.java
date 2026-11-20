@@ -104,7 +104,6 @@ public class RonovaEyeEntity extends PathAwareEntity implements GeoEntity {
             if (ronova != null && ronova.isAlive()) {
                 ronova.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 40, 3, true, false));
             } else if (this.age > 100) {
-                // Удаляем только если прошло больше 5 секунд, а босс так и не нашелся
                 this.discard();
             }
         }
@@ -121,11 +120,8 @@ public class RonovaEyeEntity extends PathAwareEntity implements GeoEntity {
                     BlockState state = serverWorld.getBlockState(pos);
 
                     if (!state.isAir() && !state.isOf(net.minecraft.block.Blocks.BEDROCK)) {
-                        // 1. Полностью сносим блок на сервере
                         serverWorld.setBlockState(pos, net.minecraft.block.Blocks.AIR.getDefaultState(), 3);
 
-                        // 2. Принудительно отправляем пакет всем игрокам поблизости,
-                        // чтобы клиент гарантированно стер коллизию и обновил рендер
                         serverWorld.getChunkManager().markForUpdate(pos);
                     }
                 }
@@ -145,7 +141,6 @@ public class RonovaEyeEntity extends PathAwareEntity implements GeoEntity {
             Entity entity = serverWorld.getEntity(uuid.get());
             if (entity instanceof RonovaEntity living) return living;
         } else {
-            // Клиентский поиск сущности по UUID
             for (Entity entity : world.getEntitiesByClass(RonovaEntity.class, this.getBoundingBox().expand(128.0), e -> true)) {
                 if (entity.getUuid().equals(uuid.get()) && entity instanceof RonovaEntity living) {
                     return living;

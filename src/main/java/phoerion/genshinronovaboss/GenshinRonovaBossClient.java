@@ -3,12 +3,15 @@ package phoerion.genshinronovaboss;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
@@ -43,7 +46,6 @@ public class GenshinRonovaBossClient implements ClientModInitializer {
         ParticleFactoryRegistry.getInstance().register(ModParticles.RONOVA_CHARGE_PARTICLE, RonovaChargeParticle.Factory::new);
         ParticleFactoryRegistry.getInstance().register(ModParticles.RONOVA_TRAIL_PARTICLE, RonovaTrailParticle.Factory::new);
         ParticleFactoryRegistry.getInstance().register(ModParticles.RONOVA_EYE_PARTICLE, RonovaEyeParticle.Factory::new);
-        ParticleFactoryRegistry.getInstance().register(ModParticles.SCARY_RONOVA_EYE_PARTICLE, ScaryRonovaEyeParticle.Factory::new);
         ParticleFactoryRegistry.getInstance().register(ModParticles.PUSH_PARTICLE, PushParticle.Factory::new);
         ParticleFactoryRegistry.getInstance().register(ModParticles.PLAYER_CHARGE_PARTICLE, PlayerChargeParticle.Factory::new);
         ParticleFactoryRegistry.getInstance().register(ModParticles.CURSE_PARTICLE, CurseParticle.Factory::new);
@@ -55,6 +57,6 @@ public class GenshinRonovaBossClient implements ClientModInitializer {
 
         AbilityClient.registerAbilities();
 
-
+        ModelLoadingPlugin.register(context -> {context.addModels(new ModelIdentifier(GenshinRonovaBoss.MOD_ID, "ruler_of_death_sword_3d", "inventory"));});
     }
 }

@@ -29,12 +29,7 @@ public class BackgroundRendererMixin {
     @Inject(method = "applyFog", at = @At("TAIL"))
     private static void applyCustomFog(Camera camera, BackgroundRenderer.FogType fogType, float viewDistance, boolean thickFog, float tickDelta, CallbackInfo ci) {
         if (ClientBossData.isRonovaFightActive) {
-            // Устанавливаем багровый/красный цвет тумана
             RenderSystem.setShaderFogColor(0.6f, 0.05f, 0.05f, 1.0f);
-
-            // Регулируем дальность тумана (делаем его ближе к игроку)
-            // Start — расстояние, с которого начинается туман
-            // End — расстояние полной видимости (чем меньше числа, тем плотнее туман)
             RenderSystem.setShaderFogStart(32.0f);
             RenderSystem.setShaderFogEnd(64.0f);
         }

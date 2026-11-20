@@ -6,7 +6,12 @@
 		"HungerManagerMixin",
 		"LivingEntityMixin",
 		"PlayerEntityMixin",
-		"StructureMixin"
+		"StructureMixin",
+		"DeathShieldMixin"
+	],
+	"client": [
+		"ItemRendererMixin",
+		"ItemRendererAccessor"
 	],
 	"injectors": {
 		"defaultRequire": 1

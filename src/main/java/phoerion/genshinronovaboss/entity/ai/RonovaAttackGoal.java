@@ -76,7 +76,7 @@ public class RonovaAttackGoal extends Goal {
         if (target == null) return;
         if(this.mob.isTryingToEscape) return;
 
-        this.EYES.clear(); // Важно очищать список каждый тик, чтобы старые/мертвые глаза удалялись
+        this.EYES.clear();
         for (RonovaEyeEntity eye : this.mob.getWorld().getEntitiesByClass(RonovaEyeEntity.class, this.mob.getBoundingBox().expand(128), e -> e.isAlive() && e.getRonovaBoss() != null)) {
             if(eye.getRonovaBoss().equals(this.mob))
                 this.EYES.add(eye);
@@ -95,7 +95,7 @@ public class RonovaAttackGoal extends Goal {
                 this.summonEyes();
             }
         }
-        // 1. Обычная стрельба шарами (если не занят телепортацией)
+
         if (!this.isTpAttacking && !this.isSlashAttacking && !this.isSummonning) {
             if (this.cooldown > 0) {
                 this.cooldown--;
@@ -114,21 +114,20 @@ public class RonovaAttackGoal extends Goal {
             }
         }
 
-        // 2. Логика таймера телепортации
+
         if (!this.isTpAttacking && !this.isSlashAttacking && !this.isSummonning) {
             if (this.tpCooldown > 0) {
                 this.tpCooldown--;
             } else {
-                // Время запускать ТП-атаку
+
                 this.isTpAttacking = true;
                 this.tpCooldown = 300;
-                this.timeTillTp = 10;   // Через 2 тика телепортируемся
-                this.timeTillBurst = 25; // Через 6 тиков начинаем стрелять очередью
+                this.timeTillTp = 10;
+                this.timeTillBurst = 25;
                 this.mob.triggerTPAttackAnimation();
 
             }
 
-            // Экстренный триггер ТП, если игрок убежал дальше 32 блоков
             float distance = this.mob.distanceTo(target);
             if (distance >= 32.0F) {
                 this.isTpAttacking = true;
@@ -148,7 +147,6 @@ public class RonovaAttackGoal extends Goal {
             }
         }
 
-        // 3. Отсчет времени до телепортации
         if (this.timeTillTp > 0) {
             this.timeTillTp--;
             if (this.timeTillTp == 0) {
@@ -156,20 +154,18 @@ public class RonovaAttackGoal extends Goal {
             }
         }
 
-        // 4. Отсчет времени до начала серии выстрелов после ТП
         if (this.timeTillBurst > 0) {
             this.timeTillBurst--;
             if (this.timeTillBurst == 0) {
-                this.keepShootingTime = 20; // Серия длится 20 тиков (1 секунду)
+                this.keepShootingTime = 20;
             }
         }
 
-        // 5. Сама серия выстрелов (берст)
         if (this.keepShootingTime > 0) {
             this.keepShootingTime--;
             burst();
             if (this.keepShootingTime == 0) {
-                this.isTpAttacking = false; // Возвращаем босса к обычному поведению
+                this.isTpAttacking = false;
             }
         }
     }
@@ -224,7 +220,6 @@ public class RonovaAttackGoal extends Goal {
         LivingEntity target = this.mob.getTarget();
         if (target == null) return;
 
-        // Спавним по 1 снаряду каждый тик в течение серии (всего 20 штук за секунду)
         RonovaBurstProjectile burstProjectile = new RonovaBurstProjectile(this.mob.getWorld(), this.mob);
         burstProjectile.setPosition(this.mob.getX(), this.mob.getEyeY() - 0.2, this.mob.getZ());
 
@@ -243,7 +238,6 @@ public class RonovaAttackGoal extends Goal {
         Vec3d eyePosition = target.getEyePos();
         Vec3d lookVector = target.getRotationVector();
 
-        // Правильное относительное смещение по всем осям X, Y, Z
         double targetX = eyePosition.x + lookVector.x * 6.0;
         double targetY = eyePosition.y + lookVector.y * 6.0;
         double targetZ = eyePosition.z + lookVector.z * 6.0;
@@ -251,9 +245,8 @@ public class RonovaAttackGoal extends Goal {
         net.minecraft.util.math.BlockPos targetPos = new net.minecraft.util.math.BlockPos((int) targetX, (int) targetY, (int) targetZ);
         net.minecraft.server.world.ServerWorld serverWorld = (net.minecraft.server.world.ServerWorld) this.mob.getWorld();
 
-        // 2. Проверка: если точка находится внутри твердого блока или под землей, поднимаем босса на уровень ног/земли игрока
         if (!serverWorld.isAir(targetPos) || !serverWorld.isAir(targetPos.up())) {
-            // Устанавливаем высоту ровно на уровень ног игрока, чтобы избежать застревания в стенах
+
             targetY = target.getY();
         }
 

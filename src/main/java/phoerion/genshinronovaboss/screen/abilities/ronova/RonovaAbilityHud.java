@@ -7,6 +7,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
+import phoerion.genshinronovaboss.GenshinRonovaBoss;
 import phoerion.genshinronovaboss.ability.ronova.CurseOnDamageAbilityManager;
 import phoerion.genshinronovaboss.ability.ronova.ExplodingAbilityManager;
 import phoerion.genshinronovaboss.ability.ronova.SlashAbilityManager;
@@ -14,13 +15,13 @@ import phoerion.genshinronovaboss.ability.ronova.SlashAbilityManager;
 
 public class RonovaAbilityHud {
 
-    private static final Identifier ICON = new Identifier("genshinronovaboss", "textures/gui/ronova_ability.png");
-    private static final Identifier COOLDOWN_ICON = new Identifier("genshinronovaboss", "textures/gui/cooldown_texture.png");
+    private static final Identifier ICON = new Identifier(GenshinRonovaBoss.MOD_ID, "textures/gui/ronova_ability.png");
+    private static final Identifier COOLDOWN_ICON = new Identifier(GenshinRonovaBoss.MOD_ID, "textures/gui/cooldown_texture.png");
 
-    private static final Identifier ICON_2 = new Identifier("genshinronovaboss", "textures/gui/ronova_ability_2.png");
-    private static final Identifier ACTIVETED_ICON = new Identifier("genshinronovaboss", "textures/gui/activated.png");
+    private static final Identifier ICON_2 = new Identifier(GenshinRonovaBoss.MOD_ID, "textures/gui/ronova_ability_2.png");
+    private static final Identifier ACTIVETED_ICON = new Identifier(GenshinRonovaBoss.MOD_ID, "textures/gui/activated.png");
 
-    private static final Identifier ICON_3 = new Identifier("genshinronovaboss", "textures/gui/ronova_ability_3.png");
+    private static final Identifier ICON_3 = new Identifier(GenshinRonovaBoss.MOD_ID, "textures/gui/ronova_ability_3.png");
 
     private static int cooldown = 0;
     private static int curse_cooldown = 0;

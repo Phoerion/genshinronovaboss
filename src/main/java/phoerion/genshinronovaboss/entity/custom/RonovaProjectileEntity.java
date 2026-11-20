@@ -67,15 +67,13 @@ public class RonovaProjectileEntity extends PersistentProjectileEntity implement
 
     @Override
     protected void onCollision(HitResult hitResult) {
-        super.onCollision(hitResult); // Обязательный вызов родительского метода
+        super.onCollision(hitResult);
 
         if (!this.getWorld().isClient()) {
             if (hitResult.getType() == HitResult.Type.BLOCK) {
                 BlockHitResult blockHitResult = (BlockHitResult) hitResult;
                 BlockPos pos = blockHitResult.getBlockPos();
                 BlockState state = this.getWorld().getBlockState(pos);
-
-                // Проверяем, является ли блок твердым (полным кубом)
 
                 explode();
 

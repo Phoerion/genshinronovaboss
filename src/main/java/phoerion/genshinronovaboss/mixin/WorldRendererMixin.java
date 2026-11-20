@@ -33,9 +33,7 @@ public class WorldRendererMixin {
         BufferBuilder buffer = tessellator.getBuffer();
 
         matrices.push();
-        // Убираем любые multiply! Матрица остается чистой.
-        // Вместо этого сдвигаем саму систему координат мира в нужную точку перед отрисовкой
-        matrices.translate(0.0f, 100.0f, 0.0f); // Позиция по X, Y, Z в мире
+        matrices.translate(0.0f, 100.0f, 0.0f);
 
         Matrix4f matrix = matrices.peek().getPositionMatrix();
 
